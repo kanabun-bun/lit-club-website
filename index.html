@@ -5,57 +5,212 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文藝部 公式Webサイト</title>
   <style>
-    /* サイト全体の基本スタイル */
+    /* 和風カラーパレットと明朝体の設定 */
     :root {
-      --primary-color: #2c3e50;
-      --accent-color: #3498db;
-      --bg-color: #fcfcfc;
-      --text-color: #333;
+      --primary-color: #164a84; /* 藍色 */
+      --accent-color: #8f2e14; /* 臙脂色 */
+      --bg-color: #f9f8f4; /* 生成色（和紙のような白） */
+      --text-color: #2b2b2b; /* 墨色 */
+      --card-bg: #ffffff;
     }
-    body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; line-height: 1.8; color: var(--text-color); background: var(--bg-color); max-width: 900px; margin: 0 auto; padding: 0 1rem; }
     
-    /* ヘッダー・ナビゲーション */
-    header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; border-bottom: 2px solid var(--primary-color); margin-bottom: 2rem; }
-    header h1 { margin: 0; font-size: 1.5rem; color: var(--primary-color); letter-spacing: 2px; }
-    nav a { margin-left: 1.5rem; text-decoration: none; color: var(--primary-color); font-weight: bold; transition: color 0.3s; }
-    nav a:hover { color: var(--accent-color); }
+    body {
+      /* 明朝体を優先適用し、文学的な雰囲気を演出 */
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+      line-height: 1.9;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      /* 和風の薄い網目模様をCSSで表現 */
+      background-image: radial-gradient(#dcd8c0 1px, transparent 1px);
+      background-size: 20px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
 
-    /* メインコンテンツ */
-    .hero { background: #fff; padding: 3rem 2rem; text-align: center; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 3rem; }
-    .hero h2 { font-size: 1.8rem; margin-bottom: 1rem; }
-    
-    .section-title { border-left: 4px solid var(--accent-color); padding-left: 1rem; margin-bottom: 1.5rem; }
-    
-    .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-    .card { background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #eee; }
-    .card h3 { margin-top: 0; color: var(--primary-color); }
-    
-    .btn { display: inline-block; background: var(--accent-color); color: #fff; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 1rem; transition: background 0.3s; }
-    .btn:hover { background: #2980b9; }
+    /* 登場アニメーション */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 制作途中お知らせバナー */
+    .construction-notice {
+      background-color: var(--accent-color);
+      color: #fff;
+      text-align: center;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      margin-top: 1rem;
+      border-radius: 2px;
+      animation: fadeInDown 0.8s ease-out forwards;
+    }
+
+    /* ヘッダー */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2.5rem 0 1.5rem 0;
+      border-bottom: 1px solid #dcd8c0;
+      margin-bottom: 2.5rem;
+      animation: fadeInDown 1s ease-out forwards;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: var(--text-color);
+      letter-spacing: 6px;
+    }
+    nav a {
+      margin-left: 1.5rem;
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: bold;
+      transition: color 0.3s;
+      position: relative;
+    }
+    /* リンクにマウスを乗せたときの下線アニメーション */
+    nav a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      bottom: -4px;
+      left: 0;
+      background-color: var(--accent-color);
+      transition: width 0.3s ease;
+    }
+    nav a:hover { color: var(--accent-color); }
+    nav a:hover::after { width: 100%; }
+
+    /* メインコンテンツのフェードイン */
+    main {
+      animation: fadeInUp 1.2s ease-out forwards;
+    }
+
+    /* ヒーローエリア（原稿用紙や和紙の枠を意識したデザイン） */
+    .hero {
+      background: var(--card-bg);
+      padding: 4rem 2rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+      margin-bottom: 4rem;
+      border: 1px solid #dcd8c0;
+      position: relative;
+    }
+    /* 内側の細い飾り枠 */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 8px; left: 8px; right: 8px; bottom: 8px;
+      border: 1px solid #f4f1e1;
+      pointer-events: none;
+    }
+    .hero-title {
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 6px;
+      color: var(--primary-color);
+    }
+    .hero p {
+      color: #555;
+      letter-spacing: 1px;
+    }
+
+    /* セクション見出し */
+    .section-title {
+      border-left: 3px solid var(--accent-color);
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+      font-size: 1.4rem;
+      letter-spacing: 4px;
+    }
+
+    /* 活動カード */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 2rem 1.5rem;
+      border: 1px solid #dcd8c0;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    /* ホバー時の浮き上がりアニメーション */
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.06);
+    }
+    .card h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-size: 1.2rem;
+      border-bottom: 1px dashed #dcd8c0;
+      padding-bottom: 0.8rem;
+    }
+
+    /* 和風ボタン（枠線のみ・ホバーで塗りつぶし） */
+    .btn {
+      display: inline-block;
+      background: transparent;
+      color: var(--accent-color);
+      padding: 0.8rem 2.5rem;
+      text-decoration: none;
+      border: 1px solid var(--accent-color);
+      letter-spacing: 2px;
+      margin-top: 1.5rem;
+      transition: all 0.4s ease;
+    }
+    .btn:hover {
+      background: var(--accent-color);
+      color: #fff;
+    }
 
     /* フッター */
-    footer { text-align: center; padding: 2rem 0; border-top: 1px solid #eee; margin-top: 3rem; font-size: 0.9rem; color: #7f8c8d; }
+    footer {
+      text-align: center;
+      padding: 3rem 0 2rem 0;
+      border-top: 1px solid #dcd8c0;
+      margin-top: 4rem;
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 2px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- 制作途中お知らせバナー -->
+  <div class="construction-notice">
+    ※当サイトは現在、本公開に向けて機能およびデザインの制作準備中です。
+  </div>
 
   <header>
     <h1>文藝部</h1>
     <nav>
       <a href="index.html">ホーム</a>
-      <a href="books.html">作品カタログ</a>
+      <a href="books.html">作品目録</a>
     </nav>
   </header>
 
   <main>
     <section class="hero">
-      <h2>言葉で紡ぐ、私たちの世界。</h2>
+      <h2 class="hero-title">言葉で紡ぐ、私たちの世界。</h2>
       <p>文藝部は、小説・詩・随筆などの創作活動を中心に活動している部活です。<br>「書くこと」「読むこと」が好きな部員たちが集まり、日々作品を寄せ合っています。</p>
-      <a href="books.html" class="btn">最新の部誌・試し読みはこちら</a>
+      <a href="books.html" class="btn">最新の部誌・試し読みへ</a>
     </section>
 
     <section>
-      <h2 class="section-title">普段の活動について</h2>
+      <h2 class="section-title">活動の栞</h2>
       <div class="grid-container">
         <div class="card">
           <h3>✍️ 創作と部誌発行</h3>
@@ -66,7 +221,7 @@
           <p>おすすめの本を紹介し合ったり、お互いの作品を読んで率直な感想や改善点を議論したりして、表現力を磨きます。</p>
         </div>
         <div class="card">
-          <h3>🎪 イベント出展</h3>
+          <h3>🎪 催事への出展</h3>
           <p>文学フリマなどの同人誌即売会や、学園祭などに出展し、自分たちの作品を広く一般の読者へ届けています。</p>
         </div>
       </div>
@@ -74,7 +229,7 @@
   </main>
 
   <footer>
-    <p>&copy; 2026 文藝部. All rights reserved.</p>
+    <p>&copy; 2026 文藝部.</p>
   </footer>
 
 </body>
