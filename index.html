@@ -3,234 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>文藝部 公式Webサイト</title>
+  <meta name="description" content="文藝部の活動、部誌、作品をご紹介します。言葉で紡ぐ、私たちの世界。">
+  <title>文藝部｜言葉で紡ぐ、私たちの世界。</title>
   <style>
-    /* 和風カラーパレットと明朝体の設定 */
-    :root {
-      --primary-color: #164a84; /* 藍色 */
-      --accent-color: #8f2e14; /* 臙脂色 */
-      --bg-color: #f9f8f4; /* 生成色（和紙のような白） */
-      --text-color: #2b2b2b; /* 墨色 */
-      --card-bg: #ffffff;
-    }
-    
-    body {
-      /* 明朝体を優先適用し、文学的な雰囲気を演出 */
-      font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
-      line-height: 1.9;
-      color: var(--text-color);
-      background-color: var(--bg-color);
-      /* 和風の薄い網目模様をCSSで表現 */
-      background-image: radial-gradient(#dcd8c0 1px, transparent 1px);
-      background-size: 20px 20px;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    /* 登場アニメーション */
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 制作途中お知らせバナー */
-    .construction-notice {
-      background-color: var(--accent-color);
-      color: #fff;
-      text-align: center;
-      padding: 0.6rem;
-      font-size: 0.9rem;
-      letter-spacing: 2px;
-      margin-top: 1rem;
-      border-radius: 2px;
-      animation: fadeInDown 0.8s ease-out forwards;
-    }
-
-    /* ヘッダー */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 2.5rem 0 1.5rem 0;
-      border-bottom: 1px solid #dcd8c0;
-      margin-bottom: 2.5rem;
-      animation: fadeInDown 1s ease-out forwards;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      color: var(--text-color);
-      letter-spacing: 6px;
-    }
-    nav a {
-      margin-left: 1.5rem;
-      text-decoration: none;
-      color: var(--text-color);
-      font-weight: bold;
-      transition: color 0.3s;
-      position: relative;
-    }
-    /* リンクにマウスを乗せたときの下線アニメーション */
-    nav a::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 1px;
-      bottom: -4px;
-      left: 0;
-      background-color: var(--accent-color);
-      transition: width 0.3s ease;
-    }
-    nav a:hover { color: var(--accent-color); }
-    nav a:hover::after { width: 100%; }
-
-    /* メインコンテンツのフェードイン */
-    main {
-      animation: fadeInUp 1.2s ease-out forwards;
-    }
-
-    /* ヒーローエリア（原稿用紙や和紙の枠を意識したデザイン） */
-    .hero {
-      background: var(--card-bg);
-      padding: 4rem 2rem;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-      margin-bottom: 4rem;
-      border: 1px solid #dcd8c0;
-      position: relative;
-    }
-    /* 内側の細い飾り枠 */
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 8px; left: 8px; right: 8px; bottom: 8px;
-      border: 1px solid #f4f1e1;
-      pointer-events: none;
-    }
-    .hero-title {
-      font-size: 2.2rem;
-      margin-bottom: 1.5rem;
-      letter-spacing: 6px;
-      color: var(--primary-color);
-    }
-    .hero p {
-      color: #555;
-      letter-spacing: 1px;
-    }
-
-    /* セクション見出し */
-    .section-title {
-      border-left: 3px solid var(--accent-color);
-      padding-left: 1rem;
-      margin-bottom: 2rem;
-      font-size: 1.4rem;
-      letter-spacing: 4px;
-    }
-
-    /* 活動カード */
-    .grid-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-    .card {
-      background: var(--card-bg);
-      padding: 2rem 1.5rem;
-      border: 1px solid #dcd8c0;
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-    }
-    /* ホバー時の浮き上がりアニメーション */
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.06);
-    }
-    .card h3 {
-      margin-top: 0;
-      color: var(--primary-color);
-      font-size: 1.2rem;
-      border-bottom: 1px dashed #dcd8c0;
-      padding-bottom: 0.8rem;
-    }
-
-    /* 和風ボタン（枠線のみ・ホバーで塗りつぶし） */
-    .btn {
-      display: inline-block;
-      background: transparent;
-      color: var(--accent-color);
-      padding: 0.8rem 2.5rem;
-      text-decoration: none;
-      border: 1px solid var(--accent-color);
-      letter-spacing: 2px;
-      margin-top: 1.5rem;
-      transition: all 0.4s ease;
-    }
-    .btn:hover {
-      background: var(--accent-color);
-      color: #fff;
-    }
-
-    /* フッター */
-    footer {
-      text-align: center;
-      padding: 3rem 0 2rem 0;
-      border-top: 1px solid #dcd8c0;
-      margin-top: 4rem;
-      font-size: 0.85rem;
-      color: #888;
-      letter-spacing: 2px;
-    }
+    :root{--paper:#f4f0e6;--ink:#292e2b;--muted:#65685e;--red:#963e30;--line:#d2cbbc;--indigo:#294c57;--serif:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.9;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.045' filter='url(%23n)'/%3E%3C/svg%3E")}a{color:inherit;text-decoration:none}button{font:inherit}a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--red);outline-offset:6px}::selection{background:#d9b1a3}p,h1,h2,h3{margin-top:0}p{overflow-wrap:anywhere}.wrap{width:min(1120px,calc(100% - 64px));margin:auto}.skip{position:fixed;top:-100px;left:20px;z-index:100;background:var(--paper);padding:10px}.skip:focus{top:10px}.progress{position:fixed;inset:0 auto auto 0;width:0;height:3px;background:var(--red);z-index:50}.notice{padding:7px 20px;text-align:center;background:var(--indigo);color:#f4f0e6;font-size:11px;letter-spacing:.2em}.header{position:sticky;top:0;z-index:20;background:rgba(244,240,230,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.header-inner{display:flex;align-items:center;justify-content:space-between;min-height:86px;gap:20px}.brand{display:flex;align-items:center;gap:14px}.brand-seal{display:grid;place-items:center;width:35px;height:39px;border:1px solid var(--red);color:var(--red);font-size:20px;transform:rotate(-5deg)}.brand-name{font-size:25px;letter-spacing:.24em}.brand small{display:block;font-size:9px;letter-spacing:.23em;color:var(--muted)}nav{display:flex;gap:30px;font-size:13px;letter-spacing:.13em}nav a{position:relative;padding:8px 0}nav a::after{content:"";position:absolute;bottom:0;left:0;width:100%;height:1px;background:var(--red);transform:scaleX(0);transform-origin:right;transition:transform .35s}nav a:hover::after{transform:scaleX(1);transform-origin:left}.menu-button{display:none;background:none;border:1px solid var(--line);padding:7px 12px;font-size:12px}
+    .hero{position:relative;min-height:700px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:60px;padding:75px 0 85px}.hero::after{content:"";position:absolute;right:8%;top:13%;width:380px;height:380px;border-radius:50%;background:#e9e2d2;z-index:-1}.eyebrow{font-size:11px;letter-spacing:.28em;color:var(--red);display:flex;align-items:center;gap:15px;margin-bottom:28px}.eyebrow::before{content:"";width:34px;height:1px;background:currentColor}.hero-copy h1{font-size:clamp(32px,3.5vw,49px);font-weight:500;letter-spacing:.13em;line-height:1.65;margin-bottom:25px}.hero-copy p{font-size:14px;line-height:2.3;color:var(--muted);max-width:390px}.link-button{display:inline-flex;align-items:center;justify-content:space-between;gap:40px;border-bottom:1px solid var(--ink);padding:13px 0;letter-spacing:.13em;font-size:13px;margin-top:15px;transition:color .3s,gap .3s}.link-button:hover{color:var(--red);gap:52px}.arrow{display:inline-block;transition:transform .3s}.link-button:hover .arrow{transform:translateX(5px)}.hero-art{position:relative;height:490px;display:flex;justify-content:center;align-items:center}.manuscript{position:absolute;inset:23px 0 17px 35px;background:linear-gradient(90deg,#b2a68e26 1px,transparent 1px),linear-gradient(#b2a68e26 1px,transparent 1px),#f8f5ee;background-size:28px 28px;border:1px solid #b2a68e60;box-shadow:18px 25px 35px #4339260c;transform:rotate(4deg);animation:paper-in 1.6s cubic-bezier(.2,.65,.2,1) both}.poem{writing-mode:vertical-rl;position:relative;font-size:31px;line-height:2.5;letter-spacing:.27em;margin:0;display:flex;flex-direction:column;gap:18px}.poem span{display:block;animation:ink-in 1.4s both}.poem span:nth-child(2){animation-delay:.25s}.poem span:nth-child(3){animation-delay:.5s}.seal{position:absolute;bottom:44px;left:60px;writing-mode:vertical-rl;color:var(--red);border:2px solid var(--red);padding:7px 4px;letter-spacing:.2em;font-size:17px;transform:rotate(-8deg);animation:stamp-in 1.4s .8s both}.art-caption{position:absolute;right:-8px;bottom:40px;writing-mode:vertical-rl;font-size:10px;letter-spacing:.2em;color:var(--muted)}.petal{position:absolute;pointer-events:none;border-radius:80% 0 80% 0;background:#ac695530;width:10px;height:17px;animation:drift 12s linear infinite}.petal.p1{left:12%;top:10%;animation-delay:-3s}.petal.p2{right:12%;top:3%;animation-delay:-8s}.petal.p3{left:55%;top:6%;animation-delay:-5s}.scroll-note{position:absolute;bottom:22px;left:0;font-size:9px;letter-spacing:.25em;display:flex;align-items:center;gap:12px}.scroll-note::before{content:"";height:35px;width:1px;background:var(--red);transform-origin:top;animation:scroll-line 2.4s infinite}
+    .section{padding:90px 0;border-top:1px solid var(--line)}.section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:45px}.section-heading h2{font-size:29px;font-weight:500;letter-spacing:.2em;margin:0}.section-heading p{font-size:12px;color:var(--muted);margin:0;letter-spacing:.12em}.section-number{font-size:11px;letter-spacing:.2em;color:var(--red);display:block;margin-bottom:12px}.intro{display:grid;grid-template-columns:1fr 1.4fr;gap:80px}.intro h2{font-size:30px;font-weight:500;letter-spacing:.2em;line-height:1.8}.intro p{font-size:14px;line-height:2.5;color:var(--muted)}.intro .small-note{font-size:11px;color:var(--red)}.activities{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.activity{padding:36px 30px;position:relative;transition:background .4s,transform .4s}.activity+.activity{border-left:1px solid var(--line)}.activity:hover{background:#fff7;transform:translateY(-5px)}.activity-no{font-size:12px;color:var(--red);letter-spacing:.2em}.activity-mark{font-size:40px;color:var(--indigo);margin:24px 0 18px;display:block}.activity h3{font-size:19px;letter-spacing:.1em;font-weight:500}.activity p{font-size:13px;line-height:2.2;color:var(--muted);margin-bottom:0}.book-feature{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:80px;background:#e8e3d7;padding:55px 65px}.book-stage{perspective:1000px;display:flex;justify-content:center}.book-cover{width:210px;height:285px;background:var(--indigo);color:var(--paper);position:relative;box-shadow:8px 9px 0 #d5cebd,18px 23px 25px #302e2726;border-left:9px solid #173844;display:flex;justify-content:center;align-items:center;transform:rotate(-7deg);transition:transform .7s}.book-stage:hover .book-cover{transform:rotate(0) rotateY(-12deg)}.book-cover::before{content:"";position:absolute;inset:16px;border:1px solid #e5dcc180}.book-title{writing-mode:vertical-rl;font-size:30px;letter-spacing:.35em}.book-cover small{position:absolute;bottom:30px;right:28px;writing-mode:vertical-rl;font-size:10px;letter-spacing:.2em}.book-feature h3{font-size:28px;font-weight:500;letter-spacing:.2em;margin-bottom:18px}.book-feature p{font-size:13px;color:var(--muted)}.tag{font-size:10px;letter-spacing:.2em;color:var(--red);display:block;margin-bottom:20px}.news-row{display:grid;grid-template-columns:120px 90px 1fr;gap:20px;border-top:1px solid var(--line);padding:24px 0;align-items:start;font-size:13px}.news-row:last-child{border-bottom:1px solid var(--line)}.news-row time{color:var(--muted);font-size:12px}.news-label{font-size:10px;color:var(--red);border:1px solid #963e3050;text-align:center;padding:2px 5px}.news-row p{margin:0}.visit{display:grid;grid-template-columns:1fr 1.2fr;gap:80px}.visit p{font-size:14px;color:var(--muted)}.faq{border-top:1px solid var(--line)}details{border-bottom:1px solid var(--line);padding:20px 0}summary{cursor:pointer;font-size:14px;letter-spacing:.05em}details p{margin:16px 0 0;font-size:13px}.footer{background:var(--ink);color:var(--paper);padding:45px 0}.footer-inner{display:flex;justify-content:space-between;gap:30px;align-items:center}.footer-brand{font-size:25px;letter-spacing:.3em}.footer p{font-size:10px;letter-spacing:.18em;opacity:.65;margin:8px 0 0}.footer a{font-size:12px;border-bottom:1px solid #f4f0e655;padding-bottom:5px}.reveal{opacity:1;transform:none}.motion .reveal{opacity:0;transform:translateY(30px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.65,.2,1);transition-delay:var(--delay,0s)}.motion .reveal.visible{opacity:1;transform:none}
+    @keyframes ink-in{from{opacity:0;filter:blur(5px);transform:translateY(-15px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}@keyframes paper-in{from{opacity:0;transform:translateY(25px) rotate(8deg)}to{opacity:1;transform:translateY(0) rotate(4deg)}}@keyframes stamp-in{0%,60%{opacity:0;transform:scale(1.4) rotate(-15deg)}100%{opacity:1;transform:scale(1) rotate(-8deg)}}@keyframes drift{0%{opacity:0;transform:translate(0,-20px) rotate(0)}15%,75%{opacity:1}100%{opacity:0;transform:translate(80px,400px) rotate(260deg)}}@keyframes scroll-line{0%,100%{transform:scaleY(.4);opacity:.3}50%{transform:scaleY(1);opacity:1}}
+    @media(max-width:800px){.wrap{width:calc(100% - 40px)}.header-inner{min-height:74px}.brand-name{font-size:21px}nav{gap:18px;font-size:12px}.hero{gap:25px;min-height:620px}.hero-copy h1{font-size:30px}.hero-art{height:400px}.poem{font-size:24px;line-height:2}.manuscript{inset:20px 0 10px 10px}.seal{left:25px;bottom:35px}.hero::after{width:260px;height:260px}.intro,.visit{gap:35px}.activity{padding:25px 18px}.book-feature{gap:40px;padding:40px 30px}.section{padding:65px 0}}
+    @media(max-width:560px){.notice{font-size:9px;letter-spacing:.08em}.menu-button{display:block}.header-inner{flex-wrap:wrap;gap:0}nav{width:100%;justify-content:space-between;padding:10px 0 15px}.menu-ready nav{display:none}.menu-ready nav.open{display:flex}.hero{grid-template-columns:1fr;padding:45px 0 65px;gap:25px}.hero-copy h1{font-size:33px}.hero-copy p{font-size:13px}.hero-art{height:365px;max-width:330px;width:100%;margin:0 auto}.poem{font-size:25px}.hero::after{top:auto;bottom:110px;right:10%}.art-caption{right:0}.scroll-note{bottom:15px}.section-heading{display:block}.section-heading h2{font-size:25px}.section-heading p{margin-top:12px}.intro,.visit,.book-feature{grid-template-columns:1fr;gap:25px}.intro h2{font-size:26px}.activities{grid-template-columns:1fr}.activity{padding:28px 12px}.activity+.activity{border-left:0;border-top:1px solid var(--line)}.activity-mark{float:right;font-size:35px;margin:0 10px}.activity h3{margin:16px 0}.book-feature{padding:40px 25px;gap:45px}.book-cover{width:180px;height:245px}.news-row{grid-template-columns:100px 80px;gap:10px}.news-row p{grid-column:1/-1}.footer-inner{align-items:flex-start}.footer a{white-space:nowrap;font-size:11px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.motion .reveal{opacity:1;transform:none}.petal{display:none}}
   </style>
 </head>
-<body>
-
-  <!-- 制作途中お知らせバナー -->
-  <div class="construction-notice">
-    ※当サイトは現在、本公開に向けて機能およびデザインの制作準備中です。
-  </div>
-
-  <header>
-    <h1>文藝部</h1>
-    <nav>
-      <a href="index.html">ホーム</a>
-      <a href="books.html">作品目録</a>
-    </nav>
+<body id="top">
+  <a class="skip" href="#main">本文へ移動</a>
+  <div class="progress" aria-hidden="true"></div>
+  <div class="notice">ただいま開巻準備中 ― 掲載内容は仮のものです</div>
+  <header class="header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="文藝部 ホーム"><span class="brand-seal" aria-hidden="true">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="navigation">目次を開く</button>
+      <nav id="navigation" aria-label="メインナビゲーション"><a href="#about">部のこと</a><a href="#activities">活動の栞</a><a href="books.html">作品目録</a><a href="#visit">見学案内</a></nav>
+    </div>
   </header>
-
-  <main>
-    <section class="hero">
-      <h2 class="hero-title">言葉で紡ぐ、私たちの世界。</h2>
-      <p>文藝部は、小説・詩・随筆などの創作活動を中心に活動している部活です。<br>「書くこと」「読むこと」が好きな部員たちが集まり、日々作品を寄せ合っています。</p>
-      <a href="books.html" class="btn">最新の部誌・試し読みへ</a>
+  <main id="main">
+    <!-- 文章の編集：各セクション内の見出し・本文を書き換えてください。 -->
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy"><div class="eyebrow">一頁から、はじまる。</div><h1 id="hero-title">言葉で紡ぐ、<br>私たちの世界。</h1><p>書きたいことがある。読んでみたい物語がある。<br>その小さな想いを持ち寄って、<br>私たちは今日も、新しい一頁をひらきます。</p><a class="link-button" href="books.html">作品目録をひらく <span class="arrow" aria-hidden="true">→</span></a></div>
+      <div class="hero-art" aria-hidden="true"><div class="manuscript"></div><div class="poem"><span>まだ名のない</span><span>想いに、</span><span>言葉を。</span></div><span class="seal">文藝之栞</span><span class="art-caption">読む、書く、そして出会う。</span></div>
+      <span class="petal p1" aria-hidden="true"></span><span class="petal p2" aria-hidden="true"></span><span class="petal p3" aria-hidden="true"></span><a class="scroll-note" href="#about">SCROLL / 次の頁へ</a>
     </section>
-
-    <section>
-      <h2 class="section-title">活動の栞</h2>
-      <div class="grid-container">
-        <div class="card">
-          <h3>✍️ 創作と部誌発行</h3>
-          <p>各部員が自由にテーマを設定し、短編小説や詩を執筆。定期的にそれらをまとめた「部誌」を発行しています。</p>
-        </div>
-        <div class="card">
-          <h3>📖 読書会・合評会</h3>
-          <p>おすすめの本を紹介し合ったり、お互いの作品を読んで率直な感想や改善点を議論したりして、表現力を磨きます。</p>
-        </div>
-        <div class="card">
-          <h3>🎪 催事への出展</h3>
-          <p>文学フリマなどの同人誌即売会や、学園祭などに出展し、自分たちの作品を広く一般の読者へ届けています。</p>
-        </div>
-      </div>
-    </section>
+    <section id="about" class="section wrap intro"><div class="reveal"><span class="section-number">第一章 / ABOUT</span><h2>言葉を愛する、<br>すべての人へ。</h2></div><div class="reveal"><p>文藝部は、小説・詩・随筆などの創作を楽しむ部活です。好きな本を語ったり、書いた作品を読み合ったり。ひとりの時間から生まれた言葉を、誰かに届ける場所をつくっています。</p><p>書き慣れている人も、これから最初の一行を書いてみたい人も。それぞれのペースで、文学のある日々を過ごしています。</p><p class="small-note">※ 部の紹介文は、後から自由に変更できます。</p></div></section>
+    <section id="activities" class="section wrap"><div class="section-heading reveal"><div><span class="section-number">第二章 / ACTIVITIES</span><h2>活動の栞</h2></div><p>日々の小さな創作を、一冊のかたちに。</p></div><div class="activities"><article class="activity reveal"><span class="activity-no">其の一</span><span class="activity-mark" aria-hidden="true">綴</span><h3>創作と部誌発行</h3><p>短編小説、詩、随筆。自由なテーマで書いた作品をまとめ、私たちの一冊をつくります。</p></article><article class="activity reveal" style="--delay:.12s"><span class="activity-no">其の二</span><span class="activity-mark" aria-hidden="true">読</span><h3>読書会・合評会</h3><p>好きな本や互いの作品を読み、感想を交わします。新しい視点と表現に出会う時間です。</p></article><article class="activity reveal" style="--delay:.24s"><span class="activity-no">其の三</span><span class="activity-mark" aria-hidden="true">届</span><h3>作品を届ける</h3><p>学園祭や催事を通して、部誌を読者のもとへ。作品からはじまる出会いを大切にします。</p></article></div></section>
+    <section id="publications" class="section wrap"><div class="section-heading reveal"><div><span class="section-number">第三章 / PUBLICATIONS</span><h2>私たちの本棚</h2></div><p>頁をめくれば、そこに誰かの世界。</p></div><div class="book-feature reveal"><div class="book-stage" aria-hidden="true"><div class="book-cover"><span class="book-title">ことのは</span><small>文藝部　作品集</small></div></div><div><span class="tag">部誌・作品集 / 表紙と誌名は仮です</span><h3>一冊に、いくつもの世界。</h3><p>部員たちの言葉を集めた部誌や作品集をご紹介します。過去の発行物や試し読みは、作品目録からご覧いただけます。</p><a class="link-button" href="books.html">作品目録へ <span class="arrow" aria-hidden="true">→</span></a></div></div></section>
+    <section id="news" class="section wrap"><div class="section-heading reveal"><div><span class="section-number">第四章 / NEWS</span><h2>文藝だより</h2></div><p>活動のお知らせ</p></div><div class="reveal"><article class="news-row"><time datetime="2026-10">2026.10</time><span class="news-label">制作中</span><p>公式サイトの開巻に向けて、準備を進めています。</p></article><article class="news-row"><span>掲載例</span><span class="news-label">部誌</span><p>新しい部誌のお知らせを、こちらに掲載します。</p></article><article class="news-row"><span>掲載例</span><span class="news-label">活動</span><p>読書会や見学のご案内を、こちらに掲載します。</p></article></div></section>
+    <section id="visit" class="section wrap visit"><div class="reveal"><span class="section-number">第五章 / VISIT</span><h2>まずは、一頁から。</h2><p>書くこと、読むことが好きなら、きっと楽しめるはず。見学や入部についての情報を、こちらに掲載していきます。</p><p>活動日時・場所・連絡先：準備中</p></div><div class="faq reveal"><details><summary>創作の経験がなくても参加できますか？</summary><p>初心者向けの案内をここに掲載します。実際の部の方針に合わせて変更してください。</p></details><details><summary>どんな作品を書いていますか？</summary><p>小説、詩、随筆など、部員それぞれの好きな表現を紹介する予定です。</p></details><details><summary>見学はどこから申し込めますか？</summary><p>見学の受付方法は準備中です。連絡先が決まり次第、こちらでご案内します。</p></details></div></section>
   </main>
-
-  <footer>
-    <p>&copy; 2026 文藝部.</p>
-  </footer>
-
+  <footer class="footer"><div class="wrap footer-inner"><div><div class="footer-brand">文藝部</div><p>言葉で紡ぐ、私たちの世界。</p><p>© 2026 文藝部</p></div><a href="#top">頁のはじめへ ↑</a></div></footer>
+  <script>
+    // 装飾と操作のみ。文章は上のHTMLで編集できます。
+    (() => {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (!reduced.matches && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => { if (entry.isIntersecting) {entry.target.classList.add('visible');observer.unobserve(entry.target);} });
+        }, {threshold: 0, rootMargin: '0px 0px -30px 0px'});
+        document.querySelectorAll('.reveal').forEach(element => observer.observe(element));
+        document.documentElement.classList.add('motion');
+      }
+      const menu = document.querySelector('.menu-button');
+      const nav = document.querySelector('#navigation');
+      const closeMenu = () => {nav.classList.remove('open');menu.setAttribute('aria-expanded', 'false');menu.textContent = '目次を開く';};
+      document.documentElement.classList.add('menu-ready');
+      menu.addEventListener('click', () => {const open = menu.getAttribute('aria-expanded') !== 'true';nav.classList.toggle('open', open);menu.setAttribute('aria-expanded', String(open));menu.textContent = open ? '目次を閉じる' : '目次を開く';});
+      nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+      document.addEventListener('keydown', event => {if (event.key === 'Escape' && nav.classList.contains('open')) {closeMenu();menu.focus();}});
+      const progress = document.querySelector('.progress');
+      let scheduled = false;
+      const updateProgress = () => {const total = document.documentElement.scrollHeight - window.innerHeight;progress.style.width = (total > 0 ? Math.min(100, Math.max(0, window.scrollY / total * 100)) : 0) + '%';scheduled = false;};
+      window.addEventListener('scroll', () => {if (!scheduled) {scheduled = true;requestAnimationFrame(updateProgress);}}, {passive: true});
+      window.addEventListener('resize', updateProgress);
+      updateProgress();
+    })();
+  </script>
 </body>
 </html>
