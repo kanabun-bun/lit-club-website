@@ -1,1 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>作品カタログ | 文藝部</title>
+  <style>
+    /* index.htmlと共通のスタイルを適用 */
+    :root {
+      --primary-color: #2c3e50;
+      --accent-color: #3498db;
+      --bg-color: #fcfcfc;
+      --text-color: #333;
+    }
+    body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; line-height: 1.8; color: var(--text-color); background: var(--bg-color); max-width: 900px; margin: 0 auto; padding: 0 1rem; }
+    
+    header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; border-bottom: 2px solid var(--primary-color); margin-bottom: 2rem; }
+    header h1 { margin: 0; font-size: 1.5rem; color: var(--primary-color); letter-spacing: 2px; }
+    nav a { margin-left: 1.5rem; text-decoration: none; color: var(--primary-color); font-weight: bold; transition: color 0.3s; }
+    nav a:hover { color: var(--accent-color); }
 
+    .section-title { border-left: 4px solid var(--accent-color); padding-left: 1rem; margin-bottom: 1.5rem; }
+
+    /* 作品紹介固有のスタイル */
+    .book-card { background: #fff; padding: 2rem; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 2rem; }
+    .book-header { border-bottom: 1px dashed #ccc; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .book-title { font-size: 1.4rem; margin: 0 0 0.5rem 0; color: var(--primary-color); }
+    .book-meta { font-size: 0.9rem; color: #666; }
+    .badge { display: inline-block; background: var(--primary-color); color: #fff; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem; margin-right: 0.5rem; vertical-align: middle; }
+    
+    .btn-buy { display: inline-block; background: #e67e22; color: #fff; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 1rem; transition: background 0.3s; }
+    .btn-buy:hover { background: #d35400; }
+
+    footer { text-align: center; padding: 2rem 0; border-top: 1px solid #eee; margin-top: 3rem; font-size: 0.9rem; color: #7f8c8d; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>文藝部</h1>
+    <nav>
+      <a href="index.html">ホーム</a>
+      <a href="books.html">作品カタログ</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2 class="section-title">作品カタログ・部誌一覧</h2>
+    <p>これまでに部員が執筆した短編集・部誌のアーカイブです。気になる作品はぜひお手に取ってみてください。</p>
+
+    <!-- 1冊目の部誌データ -->
+    <article class="book-card">
+      <div class="book-header">
+        <span class="badge">最新刊</span>
+        <h3 class="book-title">文藝部誌 第12号 『残響』</h3>
+        <div class="book-meta">
+          <span>頒布価格: 500円</span> | <span>参加部員: 6名</span> | <span>発行: 2026年11月</span>
+        </div>
+      </div>
+      <div class="book-body">
+        <p>「音」をテーマに部員6名が書き下ろした短編小説・詩集アンソロジーです。<br>静寂の中で響くクラリネット、雨音に混じる喫茶店での会話など、それぞれの「音」の解釈をお楽しみください。</p>
+        <a href="#" class="btn-buy">BOOTHで購入する（外部サイトへ）</a>
+      </div>
+    </article>
+    
+    <!-- 過去の部誌データ（サンプル） -->
+    <article class="book-card">
+      <div class="book-header">
+        <h3 class="book-title">文藝部誌 第11号 『境界線』</h3>
+        <div class="book-meta">
+          <span>頒布価格: 400円</span> | <span>参加部員: 5名</span> | <span>発行: 2026年5月</span>
+        </div>
+      </div>
+      <div class="book-body">
+        <p>日常と非日常、大人と子供、夢と現実。様々な「境界」に焦点を当てた合同短編集。</p>
+        <a href="#" class="btn-buy">BOOTHで購入する（外部サイトへ）</a>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 文藝部. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
