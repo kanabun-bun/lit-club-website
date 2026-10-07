@@ -3,84 +3,238 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>作品カタログ | 文藝部</title>
+  <meta name="description" content="文藝部の部誌・作品集を紹介する作品目録。試し読みと頒布情報をご案内します。">
+  <title>作品目録｜文藝部</title>
   <style>
-    /* index.htmlと共通のスタイルを適用 */
-    :root {
-      --primary-color: #2c3e50;
-      --accent-color: #3498db;
-      --bg-color: #fcfcfc;
-      --text-color: #333;
-    }
-    body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; line-height: 1.8; color: var(--text-color); background: var(--bg-color); max-width: 900px; margin: 0 auto; padding: 0 1rem; }
-    
-    header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0; border-bottom: 2px solid var(--primary-color); margin-bottom: 2rem; }
-    header h1 { margin: 0; font-size: 1.5rem; color: var(--primary-color); letter-spacing: 2px; }
-    nav a { margin-left: 1.5rem; text-decoration: none; color: var(--primary-color); font-weight: bold; transition: color 0.3s; }
-    nav a:hover { color: var(--accent-color); }
-
-    .section-title { border-left: 4px solid var(--accent-color); padding-left: 1rem; margin-bottom: 1.5rem; }
-
-    /* 作品紹介固有のスタイル */
-    .book-card { background: #fff; padding: 2rem; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 2rem; }
-    .book-header { border-bottom: 1px dashed #ccc; padding-bottom: 1rem; margin-bottom: 1rem; }
-    .book-title { font-size: 1.4rem; margin: 0 0 0.5rem 0; color: var(--primary-color); }
-    .book-meta { font-size: 0.9rem; color: #666; }
-    .badge { display: inline-block; background: var(--primary-color); color: #fff; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.8rem; margin-right: 0.5rem; vertical-align: middle; }
-    
-    .btn-buy { display: inline-block; background: #e67e22; color: #fff; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 1rem; transition: background 0.3s; }
-    .btn-buy:hover { background: #d35400; }
-
-    footer { text-align: center; padding: 2rem 0; border-top: 1px solid #eee; margin-top: 3rem; font-size: 0.9rem; color: #7f8c8d; }
+    :root { --paper:#f4f0e6; --ink:#292e2b; --muted:#65685e; --red:#963e30; --line:#d2cbbc; --indigo:#294c57; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif; line-height:1.9; background-image:radial-gradient(#b2a68e20 .7px,transparent .7px); background-size:5px 5px; }
+    a { color:inherit; text-decoration:none; }
+    button,input,select { font:inherit; }
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--red); outline-offset:5px; }
+    ::selection { background:#d9b1a3; }
+    .wrap { width:min(1120px,calc(100% - 64px)); margin:auto; }
+    .skip { position:fixed; top:-100px; left:20px; z-index:50; background:var(--paper); padding:10px; }
+    .skip:focus { top:10px; }
+    .notice { background:var(--indigo); color:var(--paper); padding:7px 20px; text-align:center; font-size:11px; letter-spacing:.15em; }
+    .header { border-bottom:1px solid var(--line); background:var(--paper); }
+    .header-inner { min-height:86px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .brand { display:flex; align-items:center; gap:14px; }
+    .brand-seal { display:grid; place-items:center; width:35px; height:39px; border:1px solid var(--red); color:var(--red); font-size:20px; transform:rotate(-5deg); }
+    .brand-name { font-size:25px; letter-spacing:.24em; }
+    .brand small { display:block; font-size:9px; letter-spacing:.23em; color:var(--muted); }
+    nav { display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
+    nav a { padding:8px 0; border-bottom:1px solid transparent; transition:color .3s,border-color .3s; }
+    nav a:hover,nav a[aria-current] { color:var(--red); border-color:var(--red); }
+    .page-heading { position:relative; padding:75px 0 65px; overflow:hidden; }
+    .eyebrow { font-size:11px; letter-spacing:.25em; color:var(--red); margin:0 0 20px; }
+    h1 { font-size:clamp(35px,5vw,55px); font-weight:500; letter-spacing:.25em; margin:0 0 20px; animation:ink 1.3s both; }
+    .intro { color:var(--muted); font-size:14px; line-height:2.3; max-width:620px; margin:0; animation:ink 1.3s .2s both; }
+    .heading-seal { position:absolute; right:15px; top:90px; writing-mode:vertical-rl; border:2px solid var(--red); padding:12px 7px; color:var(--red); font-size:21px; letter-spacing:.25em; transform:rotate(7deg); opacity:.7; }
+    .tools { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:22px 0; display:flex; align-items:flex-end; gap:20px; }
+    .field { display:grid; gap:6px; font-size:11px; letter-spacing:.1em; }
+    .search-field { flex:1; max-width:420px; }
+    input,select { width:100%; min-height:44px; padding:9px 12px; color:var(--ink); background:#fff5; border:1px solid var(--line); border-radius:0; font-size:13px; }
+    .count { margin:0 0 9px auto; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .shelf { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:55px 45px; padding:55px 0 80px; }
+    .book { min-width:0; border-bottom:1px solid var(--line); padding-bottom:28px; }
+    .book-stage { height:310px; background:#e8e3d7; background-image:linear-gradient(90deg,#b2a68e15 1px,transparent 1px),linear-gradient(#b2a68e15 1px,transparent 1px); background-size:30px 30px; display:flex; justify-content:center; align-items:center; perspective:1000px; position:relative; margin-bottom:25px; }
+    .book-cover { width:165px; height:235px; background:var(--cover,var(--indigo)); color:var(--paper); border-left:7px solid #0003; box-shadow:6px 6px 0 #d5cebd,15px 20px 23px #302e2726; position:relative; display:flex; align-items:center; justify-content:center; transform:rotate(-6deg); transition:transform .65s,box-shadow .65s; }
+    .book-stage:hover .book-cover { transform:rotate(0) rotateY(-12deg) translateY(-5px); box-shadow:8px 8px 0 #d5cebd,20px 25px 30px #302e2733; }
+    .book-cover::before { content:""; position:absolute; inset:12px; border:1px solid #f4f0e677; pointer-events:none; }
+    .cover-title { writing-mode:vertical-rl; font-size:27px; letter-spacing:.3em; max-height:195px; overflow:hidden; }
+    .cover-credit { position:absolute; bottom:20px; right:20px; writing-mode:vertical-rl; font-size:9px; letter-spacing:.2em; }
+    .cover-image { width:100%; height:100%; object-fit:contain; background:var(--paper); }
+    .stage-note { position:absolute; left:18px; bottom:12px; font-size:9px; letter-spacing:.15em; color:var(--muted); }
+    .book-category { font-size:10px; letter-spacing:.15em; color:var(--red); margin:0 0 8px; }
+    h2 { font-weight:500; font-size:23px; letter-spacing:.1em; margin:0 0 12px; overflow-wrap:anywhere; }
+    .meta { display:flex; flex-wrap:wrap; gap:4px 16px; color:var(--muted); font-size:11px; margin:0 0 15px; }
+    .description { font-size:13px; line-height:2.2; color:var(--muted); white-space:pre-line; overflow-wrap:anywhere; }
+    .actions { display:flex; flex-wrap:wrap; gap:12px 25px; margin-top:23px; }
+    .action { display:inline-flex; align-items:center; gap:20px; border-bottom:1px solid var(--ink); font-size:12px; padding:7px 0; transition:color .3s; }
+    .action:hover { color:var(--red); }
+    .action span { transition:transform .3s; }
+    .action:hover span { transform:translateX(4px); }
+    .pending { font-size:11px; color:var(--muted); padding:7px 0; }
+    .empty { text-align:center; color:var(--muted); padding:50px 0 70px; }
+    [hidden] { display:none!important; }
+    .end-note { border-top:1px solid var(--line); padding:35px 0 65px; font-size:12px; color:var(--muted); }
+    .end-note a { border-bottom:1px solid var(--line); }
+    .footer { background:var(--ink); color:var(--paper); padding:40px 0; }
+    .footer-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+    .footer-brand { font-size:24px; letter-spacing:.3em; }
+    .footer p { font-size:10px; opacity:.65; letter-spacing:.15em; margin:8px 0 0; }
+    .footer a { font-size:12px; border-bottom:1px solid #f4f0e655; }
+    .reveal { animation:ink .8s both; }
+    @keyframes ink { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @media(max-width:700px) { .wrap{width:calc(100% - 40px)} .shelf{gap:35px 25px} .header-inner{min-height:75px} nav{gap:16px;font-size:12px} .brand-name{font-size:21px} .heading-seal{font-size:17px;right:5px} .intro{max-width:80%} .book-stage{height:280px} }
+    @media(max-width:500px) { .header-inner{flex-wrap:wrap;padding:15px 0;gap:12px} nav{width:100%;justify-content:space-between} .page-heading{padding:45px 0} .heading-seal{top:50px;font-size:15px} .intro{max-width:85%;font-size:13px} .tools{flex-wrap:wrap;gap:15px} .search-field{flex-basis:100%;max-width:none} .count{margin-bottom:10px} .shelf{grid-template-columns:1fr;padding-top:35px} .book-stage{height:310px} .notice{font-size:9px} .footer a{font-size:11px} }
+    @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
   </style>
 </head>
-<body>
-
-  <header>
-    <h1>文藝部</h1>
-    <nav>
-      <a href="index.html">ホーム</a>
-      <a href="books.html">作品カタログ</a>
-    </nav>
-  </header>
-
-  <main>
-    <h2 class="section-title">作品カタログ・部誌一覧</h2>
-    <p>これまでに部員が執筆した短編集・部誌のアーカイブです。気になる作品はぜひお手に取ってみてください。</p>
-
-    <!-- 1冊目の部誌データ -->
-    <article class="book-card">
-      <div class="book-header">
-        <span class="badge">最新刊</span>
-        <h3 class="book-title">文藝部誌 第12号 『残響』</h3>
-        <div class="book-meta">
-          <span>頒布価格: 500円</span> | <span>参加部員: 6名</span> | <span>発行: 2026年11月</span>
-        </div>
-      </div>
-      <div class="book-body">
-        <p>「音」をテーマに部員6名が書き下ろした短編小説・詩集アンソロジーです。<br>静寂の中で響くクラリネット、雨音に混じる喫茶店での会話など、それぞれの「音」の解釈をお楽しみください。</p>
-        <a href="#" class="btn-buy">BOOTHで購入する（外部サイトへ）</a>
-      </div>
-    </article>
-    
-    <!-- 過去の部誌データ（サンプル） -->
-    <article class="book-card">
-      <div class="book-header">
-        <h3 class="book-title">文藝部誌 第11号 『境界線』</h3>
-        <div class="book-meta">
-          <span>頒布価格: 400円</span> | <span>参加部員: 5名</span> | <span>発行: 2026年5月</span>
-        </div>
-      </div>
-      <div class="book-body">
-        <p>日常と非日常、大人と子供、夢と現実。様々な「境界」に焦点を当てた合同短編集。</p>
-        <a href="#" class="btn-buy">BOOTHで購入する（外部サイトへ）</a>
-      </div>
-    </article>
+<body id="top">
+  <a class="skip" href="#main">本文へ移動</a>
+  <div class="notice">ただいま開巻準備中 ― 掲載内容は仮のものです</div>
+  <header class="header"><div class="wrap header-inner">
+    <a class="brand" href="index.html" aria-label="文藝部 ホーム"><span class="brand-seal" aria-hidden="true">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a>
+    <nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html" aria-current="page">作品目録</a><a href="index.html#visit">見学案内</a></nav>
+  </div></header>
+  <main id="main" class="wrap">
+    <section class="page-heading" aria-labelledby="page-title">
+      <p class="eyebrow">文藝部の本棚 / PUBLICATIONS</p>
+      <h1 id="page-title">作品目録</h1>
+      <p class="intro">一冊に、いくつもの世界。<br>私たちが綴ってきた部誌と作品集を、ここに。<br>気になる一冊から、物語の頁をひらいてみてください。</p>
+      <span class="heading-seal" aria-hidden="true">文藝蔵書</span>
+    </section>
+    <div class="tools" id="tools" hidden>
+      <label class="field search-field">作品を探す<input id="search" type="search" placeholder="作品名・テーマ・紹介文から検索"></label>
+      <label class="field">発行年<select id="year"><option value="">すべての年</option></select></label>
+      <p class="count" id="count" role="status" aria-live="polite"></p>
+    </div>
+    <div class="shelf" id="shelf"></div>
+    <p class="empty" id="empty" hidden>条件に合う作品がありません。検索語や発行年を変更してください。</p>
+    <noscript><p>作品一覧の表示にはJavaScriptを使用しています。ブラウザのJavaScriptを有効にしてご覧ください。</p></noscript>
+    <div class="end-note">部誌の頒布・お問い合わせについては、<a href="index.html#visit">ホームの案内</a>をご覧ください。</div>
   </main>
+  <footer class="footer"><div class="wrap footer-inner"><div><div class="footer-brand">文藝部</div><p>言葉で紡ぐ、私たちの世界。</p><p>© 2026 文藝部</p></div><a href="#top">頁のはじめへ ↑</a></div></footer>
 
-  <footer>
-    <p>&copy; 2026 文藝部. All rights reserved.</p>
-  </footer>
+  <script>
+    /* =============================================================
+       部誌の追加・編集は、この BOOKS の中だけでできます。
+       下の1冊分 { ... } をコピーし、配列の先頭または末尾に追加します。
+       各冊の間にはカンマ「,」が必要です。表示順はこの配列の順です。
 
+       title       : 表紙に表示する誌名
+       heading     : 一覧に表示する正式名称
+       category    : 「部誌」「詩集」など
+       year        : 発行年（数字）。発行年の絞り込みに使います
+       published   : 発行時期の表示。予定の場合は「予定」と書きます
+       price       : 「500円」「無料」「未定」など
+       members     : 「6名」など。空欄なら表示しません
+       description : 紹介文。改行を入れる場合は \n を使います
+       cover       : 表紙画像のパス。例「images/zankyo.jpg」
+                     空欄・画像の読み込み失敗時は仮表紙を表示します
+       color       : 仮表紙の色（# で始まる6桁のカラーコード）
+       sampleUrl   : 試し読みPDFのパス。例「pdf/zankyo-sample.pdf」
+       shopUrl     : BOOTHなどの販売ページURL
+                     リンクが未定なら空欄にします。ボタンは表示しません
+
+       画像・PDFはGitHubのリポジトリにアップロードしてください。
+       公開前にサンプルの内容と上部の制作中表記を変更してください。
+       ============================================================= */
+    const BOOKS = [
+      {
+        title: "残響",
+        heading: "文藝部誌 第12号『残響』",
+        category: "部誌 / 掲載例",
+        year: 2026,
+        published: "2026年11月（予定）",
+        price: "500円（仮）",
+        members: "6名（仮）",
+        description: "「音」をテーマにした短編小説・詩のアンソロジー。\n雨音、喫茶店のざわめき、誰かの記憶に残る旋律。それぞれの音から生まれた物語を集めました。",
+        cover: "",
+        color: "#294c57",
+        sampleUrl: "",
+        shopUrl: ""
+      },
+      {
+        title: "境界線",
+        heading: "文藝部誌 第11号『境界線』",
+        category: "部誌 / 掲載例",
+        year: 2026,
+        published: "2026年5月（仮）",
+        price: "400円（仮）",
+        members: "5名（仮）",
+        description: "日常と非日常、大人と子供、夢と現実。\nさまざまな「境界」に焦点を当てた合同短編集です。",
+        cover: "",
+        color: "#963e30",
+        sampleUrl: "",
+        shopUrl: ""
+      }
+    ];
+
+    // ここから下は一覧を自動生成する処理です。通常は編集不要です。
+    (() => {
+      const shelf = document.getElementById('shelf');
+      const search = document.getElementById('search');
+      const year = document.getElementById('year');
+      const count = document.getElementById('count');
+      const empty = document.getElementById('empty');
+      const make = (tag, className, text) => {
+        const element = document.createElement(tag);
+        if (className) element.className = className;
+        if (text !== undefined) element.textContent = String(text);
+        return element;
+      };
+      const safeUrl = value => {
+        if (typeof value !== 'string' || !value.trim()) return '';
+        try {
+          const url = new URL(value.trim(), window.location.href);
+          return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+        } catch { return ''; }
+      };
+      const addLink = (container, value, label) => {
+        const url = safeUrl(value);
+        if (!url) return false;
+        const link = make('a', 'action', label);
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', label + '（新しいタブで開きます）');
+        link.append(make('span', '', '↗'));
+        container.append(link);
+        return true;
+      };
+      const createBook = book => {
+        const article = make('article', 'book reveal');
+        const stage = make('div', 'book-stage');
+        const cover = make('div', 'book-cover');
+        cover.setAttribute('aria-hidden', 'true');
+        if (/^#[0-9a-f]{6}$/i.test(book.color || '')) cover.style.setProperty('--cover', book.color);
+        const placeholder = () => {
+          cover.replaceChildren(make('span', 'cover-title', book.title), make('span', 'cover-credit', '文藝部 作品集'));
+        };
+        placeholder();
+        const imageUrl = safeUrl(book.cover);
+        const stageNote = make('span', 'stage-note', '仮表紙');
+        if (imageUrl) {
+          const image = make('img', 'cover-image');
+          image.alt = '';
+          image.loading = 'lazy';
+          image.addEventListener('load', () => { stageNote.textContent = '表紙'; });
+          image.addEventListener('error', placeholder, { once: true });
+          image.src = imageUrl;
+          cover.replaceChildren(image);
+        }
+        stage.append(cover, stageNote);
+        const meta = make('p', 'meta');
+        if (book.published) meta.append(make('span', '', '発行：' + book.published));
+        if (book.price) meta.append(make('span', '', '頒布価格：' + book.price));
+        if (book.members) meta.append(make('span', '', '参加部員：' + book.members));
+        const actions = make('div', 'actions');
+        const sample = addLink(actions, book.sampleUrl, '試し読み');
+        const shop = addLink(actions, book.shopUrl, '販売ページ');
+        if (!sample && !shop) actions.append(make('span', 'pending', '試し読み・頒布情報は準備中です'));
+        article.append(stage, make('p', 'book-category', book.category || '作品集'), make('h2', '', book.heading || book.title), meta, make('p', 'description', book.description || ''), actions);
+        return article;
+      };
+      const years = [...new Set(BOOKS.map(book => book.year).filter(Number.isInteger))].sort((a, b) => b - a);
+      years.forEach(value => { const option = make('option', '', value + '年'); option.value = value; year.append(option); });
+      const normalize = value => String(value).normalize('NFKC').toLocaleLowerCase('ja').trim();
+      const render = () => {
+        const query = normalize(search.value);
+        const books = BOOKS.filter(book => (!year.value || String(book.year) === year.value) && normalize([book.title, book.heading, book.category, book.description].join(' ')).includes(query));
+        shelf.replaceChildren(...books.map(createBook));
+        count.textContent = books.length + '冊 / 全' + BOOKS.length + '冊';
+        empty.hidden = books.length > 0;
+        shelf.hidden = books.length === 0;
+      };
+      search.addEventListener('input', render);
+      year.addEventListener('change', render);
+      render();
+      document.getElementById('tools').hidden = false;
+    })();
+  </script>
 </body>
 </html>
