@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="文藝部の部誌・作品集を紹介する作品目録。試し読みと頒布情報をご案内します。">
+  <meta name="description" content="文藝部の部誌・作品集を紹介する作品目録。収録作品の目次と短い抜粋、頒布情報をご案内します。">
   <title>作品目録｜文藝部</title>
   <style>
     :root { --paper:#f4f0e6; --ink:#292e2b; --muted:#65685e; --red:#963e30; --line:#d2cbbc; --indigo:#294c57; }
@@ -56,6 +56,24 @@
     .action:hover { color:var(--red); }
     .action span { transition:transform .3s; }
     .action:hover span { transform:translateX(4px); }
+    .excerpt { margin:25px 0 0; padding:25px 22px; background:#fff6; border-left:2px solid var(--red); }
+    .excerpt-label { color:var(--red); font-size:10px; letter-spacing:.2em; margin:0 0 12px; }
+    .excerpt h3 { font-size:17px; font-weight:500; letter-spacing:.12em; margin:0 0 6px; }
+    .excerpt-author { font-size:11px; color:var(--muted); margin:0 0 20px; }
+    .excerpt blockquote { margin:0; font-size:14px; line-height:2.4; overflow-wrap:anywhere; }
+    .excerpt-line { display:block; white-space:pre-wrap; }
+    .excerpt-line + .excerpt-line { margin-top:12px; }
+    .motion .excerpt-line { opacity:0; transform:translateY(12px); transition:opacity 1s ease,transform 1s ease; transition-delay:var(--delay,0s); }
+    .motion .excerpt-line.visible { opacity:1; transform:none; }
+    .excerpt-note { font-size:10px; color:var(--muted); margin:18px 0 0; letter-spacing:.1em; }
+    .contents { margin-top:25px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .contents summary { cursor:pointer; padding:17px 0; font-size:13px; letter-spacing:.1em; color:var(--red); }
+    .contents summary:focus-visible { outline:2px solid var(--red); outline-offset:4px; }
+    .contents-list { margin:0; padding:0 0 15px; list-style:none; }
+    .contents-item { display:flex; justify-content:space-between; align-items:baseline; gap:15px; padding:12px 0; border-top:1px dashed var(--line); }
+    .contents-title { font-size:14px; overflow-wrap:anywhere; }
+    .contents-meta { display:block; font-size:10px; color:var(--muted); margin-top:3px; }
+    .contents-page { font-size:11px; color:var(--muted); white-space:nowrap; }
     .pending { font-size:11px; color:var(--muted); padding:7px 0; }
     .empty { text-align:center; color:var(--muted); padding:50px 0 70px; }
     [hidden] { display:none!important; }
@@ -70,7 +88,7 @@
     @keyframes ink { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
     @media(max-width:700px) { .wrap{width:calc(100% - 40px)} .shelf{gap:35px 25px} .header-inner{min-height:75px} nav{gap:16px;font-size:12px} .brand-name{font-size:21px} .heading-seal{font-size:17px;right:5px} .intro{max-width:80%} .book-stage{height:280px} }
     @media(max-width:500px) { .header-inner{flex-wrap:wrap;padding:15px 0;gap:12px} nav{width:100%;justify-content:space-between} .page-heading{padding:45px 0} .heading-seal{top:50px;font-size:15px} .intro{max-width:85%;font-size:13px} .tools{flex-wrap:wrap;gap:15px} .search-field{flex-basis:100%;max-width:none} .count{margin-bottom:10px} .shelf{grid-template-columns:1fr;padding-top:35px} .book-stage{height:310px} .notice{font-size:9px} .footer a{font-size:11px} }
-    @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
+    @media(prefers-reduced-motion:reduce) { .motion .excerpt-line{opacity:1;transform:none}  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
   </style>
 </head>
 <body id="top">
@@ -84,11 +102,11 @@
     <section class="page-heading" aria-labelledby="page-title">
       <p class="eyebrow">文藝部の本棚 / PUBLICATIONS</p>
       <h1 id="page-title">作品目録</h1>
-      <p class="intro">一冊に、いくつもの世界。<br>私たちが綴ってきた部誌と作品集を、ここに。<br>気になる一冊から、物語の頁をひらいてみてください。</p>
+      <p class="intro">一冊に、いくつもの世界。<br>私たちが綴ってきた部誌と作品集を、ここに。<br>短い抜粋と目次から、気になる一冊を見つけてください。</p>
       <span class="heading-seal" aria-hidden="true">文藝蔵書</span>
     </section>
     <div class="tools" id="tools" hidden>
-      <label class="field search-field">作品を探す<input id="search" type="search" placeholder="作品名・テーマ・紹介文から検索"></label>
+      <label class="field search-field">作品を探す<input id="search" type="search" placeholder="誌名・掲載作品名・作者名から検索"></label>
       <label class="field">発行年<select id="year"><option value="">すべての年</option></select></label>
       <p class="count" id="count" role="status" aria-live="polite"></p>
     </div>
@@ -116,11 +134,15 @@
        cover       : 表紙画像のパス。例「images/zankyo.jpg」
                      空欄・画像の読み込み失敗時は仮表紙を表示します
        color       : 仮表紙の色（# で始まる6桁のカラーコード）
-       sampleUrl   : 試し読みPDFのパス。例「pdf/zankyo-sample.pdf」
+       contents    : 目次。作品を { title, author, genre, page } で追加します
+                     page は任意です。作品ごとの全文は載せません
+       excerpts    : 公開する短い抜粋。{ title, author, text } で追加します
+                     text は公開してよい部分だけ記入してください
+                     改行は \n。未掲載なら [] にします
        shopUrl     : BOOTHなどの販売ページURL
                      リンクが未定なら空欄にします。ボタンは表示しません
 
-       画像・PDFはGitHubのリポジトリにアップロードしてください。
+       表紙画像はGitHubのリポジトリにアップロードしてください。
        公開前にサンプルの内容と上部の制作中表記を変更してください。
        ============================================================= */
     const BOOKS = [
@@ -135,7 +157,18 @@
         description: "「音」をテーマにした短編小説・詩のアンソロジー。\n雨音、喫茶店のざわめき、誰かの記憶に残る旋律。それぞれの音から生まれた物語を集めました。",
         cover: "",
         color: "#294c57",
-        sampleUrl: "",
+        contents: [
+          { title: "雨音の喫茶店", author: "筆名一（仮）", genre: "短編小説", page: "4" },
+          { title: "遠い旋律", author: "筆名二（仮）", genre: "詩", page: "18" },
+          { title: "静寂のあとで", author: "筆名三（仮）", genre: "随筆", page: "24" }
+        ],
+        excerpts: [
+          {
+            title: "雨音の喫茶店（掲載例）",
+            author: "筆名一（仮）",
+            text: "雨が降ると、あの喫茶店を思い出す。\n窓辺の席で、冷めてゆく珈琲を前に、私たちは言葉の続きを探していた。\nあの日、言えなかった一言だけが、今も雨音の向こうに残っている。"
+          }
+        ],
         shopUrl: ""
       },
       {
@@ -149,7 +182,17 @@
         description: "日常と非日常、大人と子供、夢と現実。\nさまざまな「境界」に焦点を当てた合同短編集です。",
         cover: "",
         color: "#963e30",
-        sampleUrl: "",
+        contents: [
+          { title: "夕暮れの境界", author: "筆名四（仮）", genre: "短編小説", page: "4" },
+          { title: "向こう岸", author: "筆名五（仮）", genre: "詩", page: "16" }
+        ],
+        excerpts: [
+          {
+            title: "夕暮れの境界（掲載例）",
+            author: "筆名四（仮）",
+            text: "橋の真ん中で、足を止めた。\n向こう岸には、昨日までの私が知らない夕暮れがある。\n一歩を踏み出すには、まだ少しだけ勇気が足りなかった。"
+          }
+        ],
         shopUrl: ""
       }
     ];
@@ -213,19 +256,62 @@
         if (book.price) meta.append(make('span', '', '頒布価格：' + book.price));
         if (book.members) meta.append(make('span', '', '参加部員：' + book.members));
         const actions = make('div', 'actions');
-        const sample = addLink(actions, book.sampleUrl, '試し読み');
         const shop = addLink(actions, book.shopUrl, '販売ページ');
-        if (!sample && !shop) actions.append(make('span', 'pending', '試し読み・頒布情報は準備中です'));
-        article.append(stage, make('p', 'book-category', book.category || '作品集'), make('h2', '', book.heading || book.title), meta, make('p', 'description', book.description || ''), actions);
+        if (!shop) actions.append(make('span', 'pending', '販売先は準備中です'));
+        article.append(stage, make('p', 'book-category', book.category || '作品集'), make('h2', '', book.heading || book.title), meta, make('p', 'description', book.description || ''));
+        (book.excerpts || []).forEach(excerpt => {
+          const section = make('section', 'excerpt');
+          section.append(make('p', 'excerpt-label', '物語のひとしずく / EXCERPT'), make('h3', '', excerpt.title || '作品抜粋'));
+          if (excerpt.author) section.append(make('p', 'excerpt-author', excerpt.author));
+          const quote = make('blockquote');
+          String(excerpt.text || '').split('\n').forEach(line => {
+            if (!line.trim()) return;
+            quote.append(make('span', 'excerpt-line', line));
+          });
+          section.append(quote, make('p', 'excerpt-note', '作品の一部抜粋です。続きは部誌でお楽しみください。'));
+          article.append(section);
+        });
+        if (book.contents && book.contents.length) {
+          const contents = make('details', 'contents');
+          const summary = make('summary', '', '掲載作品はこちら — 目次をひらく');
+          const list = make('ol', 'contents-list');
+          book.contents.forEach(work => {
+            const item = make('li', 'contents-item');
+            const name = make('div', 'contents-title', work.title || '無題');
+            const info = [work.author, work.genre].filter(Boolean).join(' / ');
+            if (info) name.append(make('span', 'contents-meta', info));
+            item.append(name);
+            if (work.page) item.append(make('span', 'contents-page', 'p. ' + work.page));
+            list.append(item);
+          });
+          contents.append(summary, list);
+          article.append(contents);
+        }
+        article.append(actions);
         return article;
       };
       const years = [...new Set(BOOKS.map(book => book.year).filter(Number.isInteger))].sort((a, b) => b - a);
       years.forEach(value => { const option = make('option', '', value + '年'); option.value = value; year.append(option); });
       const normalize = value => String(value).normalize('NFKC').toLocaleLowerCase('ja').trim();
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const observer = !reduced.matches && 'IntersectionObserver' in window
+        ? new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+            });
+          }, { threshold: 0, rootMargin: '0px 0px -15px 0px' }) : null;
+      if (observer) document.documentElement.classList.add('motion');
       const render = () => {
         const query = normalize(search.value);
-        const books = BOOKS.filter(book => (!year.value || String(book.year) === year.value) && normalize([book.title, book.heading, book.category, book.description].join(' ')).includes(query));
+        const books = BOOKS.filter(book => (!year.value || String(book.year) === year.value) && normalize([book.title, book.heading, book.category, book.description, ...(book.contents || []).flatMap(work => [work.title, work.author]), ...(book.excerpts || []).flatMap(work => [work.title, work.author])].join(' ')).includes(query));
+        if (observer) observer.disconnect();
         shelf.replaceChildren(...books.map(createBook));
+        if (observer) shelf.querySelectorAll('.excerpt').forEach(section => {
+          section.querySelectorAll('.excerpt-line').forEach((line, index) => {
+            line.style.setProperty('--delay', Math.min(index, 4) * .12 + 's');
+            observer.observe(line);
+          });
+        });
         count.textContent = books.length + '冊 / 全' + BOOKS.length + '冊';
         empty.hidden = books.length > 0;
         shelf.hidden = books.length === 0;
