@@ -1,0 +1,12 @@
+# Local/private CMS state must never be committed to the public source repository.
+**/.local-demo/
+**/__pycache__/
+**/*.sqlite3
+**/*.sqlite3-*
+**/.dev.vars*
+**/.env*
+**/.wrangler/
+**/node_modules/
+cms/.github-export/
+cms/data/
+cms/pdfs/

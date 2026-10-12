@@ -3,13 +3,13 @@ const labels={introduction:'作品紹介',issue:'部誌',message:'部員のひ�
 const fieldLabels={title:'見出し・名称',workId:'対象作品',author:'掲載名',body:'本文・紹介文',excerpt:'一般公開する短い抜粋',number:'号数',date:'日付・期間',description:'紹介文',contents:'目次（作品名・作者・ページを一行ずつ）',role:'役職',place:'会場',url:'案内URL',address:'住所',issues:'取り扱い部誌（一行ずつ）'};
 const fields={introduction:['title','workId','author','body','excerpt'],issue:['title','number','date','description','contents'],message:['title','role','author','body'],event:['title','date','place','body','url'],store:['title','address','body','url','issues'],notice:['title','date','body'],page:['title','body']};
 let demo=new URLSearchParams(location.search).has('demo');
-let localServer=false;
+let localServer=false,githubServer=false,recordsEnabled=false,pdfEnabled=false,maxPdfBytes=50000000,revision='',busy=false;
 let role='guest',pendingRole='member',entries=[],authors=[],works=[];
 function status(message){$('status').textContent=message;}
 async function api(path,options={}){
  if(demo)return demoApi(path,options);
- const response=await fetch(path,{...options,headers:{'Content-Type':'application/json',...options.headers}});
- const data=await response.json();if(!response.ok)throw new Error(data.error||'処理を完了できません');return data;
+ const response=await fetch(path,{...options,headers:{'Content-Type':'application/json',...(githubServer&&revision&&options.method?{'X-CMS-Revision':revision}:{}),...options.headers}});
+ const data=await response.json();if(!response.ok)throw new Error(data.error||'処理を完了できません');if(githubServer&&data.revision&&(options.method||path==='/api/admin/snapshot'))revision=data.revision;return data;
 }
 // Explicit design preview: fictional data, memory only, no passwords, no persistence.
 async function demoApi(path,options){
@@ -51,11 +51,11 @@ async function loadMember(){
  if(!items.length)$('member-list').append(element('p','条件に合う会員公開済み作品がありません。'));
 }
 async function loadAdmin(){
- const result=await Promise.all([api('/api/admin/entries'),api('/api/admin/authors'),api('/api/admin/works')]);entries=result[0].items;authors=result[1].items;works=result[2].items;renderEntries();
+ if(githubServer){const x=await api('/api/admin/snapshot');entries=x.entries;authors=x.authors;works=x.works;}else{const result=await Promise.all([api('/api/admin/entries'),api('/api/admin/authors'),api('/api/admin/works')]);entries=result[0].items;authors=result[1].items;works=result[2].items;}renderEntries();
  const select=$('work-form').elements.author_id;select.replaceChildren(element('option','作者を選択'));select.firstChild.value='';authors.forEach(a=>{const o=element('option',a.label+' ／ '+a.id);o.value=a.id;select.append(o);});
  const pdfSelect=$('pdf-form').elements.work_id;pdfSelect.replaceChildren(element('option','作品を選択'));pdfSelect.firstChild.value='';works.forEach(w=>{const o=element('option',w.title+' ／ '+w.credited_name);o.value=w.id;pdfSelect.append(o);});
- $('pdf-tools').hidden=!localServer;$('records-tools').hidden=!localServer;
- if(localServer)renderRecords();
+ $('pdf-tools').hidden=!pdfEnabled;$('records-tools').hidden=!recordsEnabled;
+ if(recordsEnabled)renderRecords();
 }
 function renderEntries(){
  const filtered=entries.filter(e=>!$('admin-kind').value||e.kind===$('admin-kind').value);
@@ -63,7 +63,7 @@ function renderEntries(){
 }
 function edit(entry){
  $('author-form').hidden=$('work-form').hidden=true;$('entry-form').hidden=false;$('editor-empty').hidden=true;$('preview').hidden=true;
- $('delete-entry').hidden=!localServer||!entry;
+ $('delete-entry').hidden=!recordsEnabled||!entry;
  const f=$('entry-form');f.elements.id.value=entry?.id||'';f.elements.version.value=entry?.version||'';if(entry)f.elements.kind.value=entry.kind;f.elements.kind.disabled=!!entry;renderFields(entry?.draft||{});
 }
 function renderFields(content){
@@ -79,12 +79,12 @@ function formContent(){const values=new FormData($('entry-form'));const c={};for
 for(const [kind,label] of Object.entries(labels)){for(const id of ['editor-kind','admin-kind']){const o=element('option',label);o.value=kind;$(id).append(o);}}
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
 $('admin-kind').onchange=renderEntries;$('editor-kind').onchange=()=>renderFields({});
-$('new-entry').onclick=()=>edit(null);$('reload').onclick=()=>loadAdmin().catch(e=>status(e.message));
+$('new-entry').onclick=()=>edit(null);$('reload').onclick=()=>{if(!confirm('編集中の入力を閉じ、最新の一覧を読み込みますか？'))return;for(const id of ['entry-form','work-form','author-form','preview'])$(id).hidden=true;loadAdmin().catch(e=>status(e.message));};
 $('new-author').onclick=()=>{editAuthor(null);};
 $('new-work').onclick=()=>{editWork(null);};
 $('preview-button').onclick=()=>{$('preview-body').replaceChildren(renderContent($('editor-kind').value,formContent()));$('preview').hidden=false;};
 $('login-form').onsubmit=async event=>{event.preventDefault();try{const x=await api('/api/login',{method:'POST',body:JSON.stringify({role:pendingRole,password:new FormData(event.target).get('password')})});role=x.role;event.target.reset();await show(role==='admin'?'admin':'member');}catch(e){status(e.message);}};
-$('logout').onclick=async()=>{try{await api('/api/logout',{method:'POST',body:'{}'});role='guest';entries=[];authors=[];works=[];$('entry-form').reset();$('entry-form').hidden=true;$('preview-body').replaceChildren();$('admin-list').replaceChildren();$('member-list').replaceChildren();await show('member');}catch(e){status(e.message);}};
+$('logout').onclick=async()=>{try{await api('/api/logout',{method:'POST',body:'{}'});role='guest';entries=[];authors=[];works=[];revision='';$('entry-form').reset();$('entry-form').hidden=true;$('preview-body').replaceChildren();$('admin-list').replaceChildren();$('member-list').replaceChildren();await show('member');}catch(e){status(e.message);}};
 $('member-search').onsubmit=event=>{event.preventDefault();loadMember().catch(e=>status(e.message));};
 for(const [id,path] of [['author-form','authors'],['work-form','works']])$(id).onsubmit=async event=>{event.preventDefault();try{const x=Object.fromEntries(new FormData(event.target)),key=x.id;delete x.id;await api('/api/admin/'+path+(key?'/'+encodeURIComponent(key):''),{method:key?'PUT':'POST',body:JSON.stringify(x)});event.target.reset();event.target.hidden=true;await loadAdmin();status('保存しました。');}catch(e){status(e.message);}};
 $('entry-form').onsubmit=async event=>{
@@ -94,16 +94,16 @@ $('entry-form').onsubmit=async event=>{
  const buttons=[...f.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);
  try{
   let id=f.elements.id.value,version=Number(f.elements.version.value);const content=formContent();
-  if(!id){const x=await api('/api/admin/entries',{method:'POST',body:JSON.stringify({kind,content})});id=x.id;version=1;}
+  if(!id){const x=await api('/api/admin/entries',{method:'POST',body:JSON.stringify({kind,content})});id=x.id;version=1;f.elements.id.value=id;f.elements.version.value=version;}
   await api('/api/admin/entries/'+id,{method:'PUT',body:JSON.stringify({action,content,version})});
   await loadAdmin();edit(entries.find(e=>e.id===id));status(action==='publish'?'公開しました。':action==='unpublish'?'公開を取り下げました。':'下書きを保存しました。');
  }catch(e){status(e.message);}finally{buttons.forEach(b=>b.disabled=false);}
 };
 $('pdf-form').elements.work_id.onchange=()=>{const w=works.find(w=>w.id===$('pdf-form').elements.work_id.value);$('pdf-form').elements.search_text.value=w?.search_text||'';$('pdf-form').elements.member_status.value=w?.member_status||'draft';};
-$('pdf-form').onsubmit=async event=>{event.preventDefault();const f=event.target;try{const id=f.elements.work_id.value;if(!id)throw Error('作品を選択してください');const file=f.elements.pdf.files[0];if(file){if(file.size>50000000)throw Error('PDFは50MB以内です');const r=await fetch('/api/admin/works/'+encodeURIComponent(id)+'/pdf',{method:'PUT',body:file,headers:{'Content-Type':'application/pdf'}});const data=await r.json();if(!r.ok)throw Error(data.error);}
+$('pdf-form').onsubmit=async event=>{event.preventDefault();const f=event.target;try{const id=f.elements.work_id.value;if(!id)throw Error('作品を選択してください');const file=f.elements.pdf.files[0];if(file){if(file.size>maxPdfBytes)throw Error('PDFは'+Math.floor(maxPdfBytes/1000000)+'MB以内です');const r=await fetch('/api/admin/works/'+encodeURIComponent(id)+'/pdf',{method:'PUT',body:file,headers:{'Content-Type':'application/pdf',...(githubServer&&revision?{'X-CMS-Revision':revision}:{})}});const data=await r.json();if(!r.ok)throw Error(data.error);if(data.revision)revision=data.revision;f.elements.pdf.value='';}
 await api('/api/admin/works/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({member_status:f.elements.member_status.value,search_text:f.elements.search_text.value})});await loadAdmin();status('PDF・会員公開状態を保存しました。');f.elements.pdf.value='';}catch(e){status(e.message);}};
-function editAuthor(author){const f=$('author-form');f.reset();f.hidden=false;$('work-form').hidden=true;f.elements.id.value=author?.id||'';f.elements.label.value=author?.label||'';f.elements.membership.value=author?.membership||'current';$('author-form-title').textContent=author?'作者を修正':'作者を登録';f.scrollIntoView({block:'center'});}
-function editWork(work){const f=$('work-form');f.reset();f.hidden=false;$('author-form').hidden=true;f.elements.id.value=work?.id||'';f.elements.title.value=work?.title||'';f.elements.credited_name.value=work?.credited_name||'';f.elements.author_id.value=work?.author_id||'';$('work-form-title').textContent=work?'作品情報を修正':'作品を登録';f.scrollIntoView({block:'center'});}
+function editAuthor(author){$('entry-form').hidden=true;$('preview').hidden=true;const f=$('author-form');f.reset();f.hidden=false;$('work-form').hidden=true;f.elements.id.value=author?.id||'';f.elements.label.value=author?.label||'';f.elements.membership.value=author?.membership||'current';$('author-form-title').textContent=author?'作者を修正':'作者を登録';f.scrollIntoView({block:'center'});}
+function editWork(work){$('entry-form').hidden=true;$('preview').hidden=true;const f=$('work-form');f.reset();f.hidden=false;$('author-form').hidden=true;f.elements.id.value=work?.id||'';f.elements.title.value=work?.title||'';f.elements.credited_name.value=work?.credited_name||'';f.elements.author_id.value=work?.author_id||'';$('work-form-title').textContent=work?'作品情報を修正':'作品を登録';f.scrollIntoView({block:'center'});}
 function renderRecords(){
  for(const [id,list,type,edit] of [['work-records',works,'works',editWork],['author-records',authors,'authors',editAuthor]]){
   $(id).replaceChildren(...list.map(record=>{const card=element('div',undefined,'record');card.append(element('p',type==='works'?record.title+' ／ '+record.credited_name:record.label));const buttons=element('div',undefined,'toolbar');const modify=element('button','修正');modify.onclick=()=>edit(record);const remove=element('button','削除');remove.onclick=async()=>{const message=type==='works'?'この作品とPDF・関連する作品紹介を削除します。元に戻せません。部誌目次は別途修正が必要です。':'この作者を削除します。作品が残っている作者は削除できません。';if(!confirm(message))return;try{const result=await api('/api/admin/'+type+'/'+encodeURIComponent(record.id),{method:'DELETE'});await loadAdmin();status(result.warning||'削除しました。');}catch(e){status(e.message);}};buttons.append(modify,remove);card.append(buttons);return card;}));
@@ -111,11 +111,14 @@ function renderRecords(){
 }
 $('delete-entry').onclick=async()=>{const f=$('entry-form');if(!f.elements.id.value||!confirm('この記事を削除します。公開ページからも消え、元に戻せません。'))return;try{await api('/api/admin/entries/'+encodeURIComponent(f.elements.id.value),{method:'DELETE',body:JSON.stringify({version:Number(f.elements.version.value)})});f.hidden=true;$('preview').hidden=true;await loadAdmin();status('削除しました。');}catch(e){status(e.message);}};
 window.clubPortalReady=true;
-try {const probe=await fetch('/api/status');if(probe.ok){const info=await probe.json();if(info.localDemo){demo=false;localServer=true;}}}catch{}
+try {const probe=await fetch('/api/status');if(probe.ok){const info=await probe.json();if(info.localDemo){demo=false;localServer=true;recordsEnabled=true;pdfEnabled=true;}if(info.backend==='github'){demo=false;githubServer=true;recordsEnabled=info.records;pdfEnabled=info.pdfUpload;maxPdfBytes=info.maxPdfBytes||10000000;}}}catch{}
 if(localServer){$('banner').hidden=false;$('banner').textContent='PC内の保存付きデモです。部員: member-demo ／ 管理者: admin-demo。内容はこのPCだけに保存されます。';}
+if(githubServer){$('pdf-limit').textContent='PDF（'+Math.floor(maxPdfBytes/1000000)+'MB以内・差し替え可）';}
 if(demo){
  $('home-link').href='index.html?demo=1';
  $('banner').hidden=false;$('banner').textContent='画面確認用デモです。入力はこのタブのメモリ内だけで、再読み込みすると消えます。実際のログイン・DB保存・PDF登録は行いません。デモでは任意の入力で画面を確認できます。';
  entries=[{id:'sample',kind:'message',version:1,draft:{title:'部長からのご挨拶（架空の例）',role:'部長',author:'サンプル',body:'読むことも、書くことも。それぞれの言葉を大切にする場所へ。'},published:{title:'部長からのご挨拶（架空の例）',role:'部長',author:'サンプル',body:'読むことも、書くことも。それぞれの言葉を大切にする場所へ。'}}];
 }
-try{role=(await api('/api/session')).role;const config=await api('/api/status');if(!demo&&(!config.database||!config.auth)){$('banner').hidden=false;$('banner').textContent='初期設定待ちです。データベース・認証の接続後に利用できます。';}await show('member');}catch(e){status(e.message);}
+try{role=(await api('/api/session')).role;const config=await api('/api/status');if(!demo&&(!config.database||!config.auth)){$('banner').hidden=false;$('banner').textContent='初期設定待ちです。保存先・認証・アクセス制限の接続後に利用できます。';}await show('member');}catch(e){status(e.message);}
+
+for(const form of document.querySelectorAll("form")){const handler=form.onsubmit;if(handler)form.onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;const controls=[...document.querySelectorAll("button")];controls.forEach(b=>b.disabled=true);try{await handler(event);}finally{busy=false;controls.forEach(b=>b.disabled=false);}};}

@@ -1,8 +1,7 @@
-// The old public design remains. In the local simulator published data replaces
-// its corresponding content; when no local API is available original HTML stays.
+// Published snapshots power both local and GitHub backends; never expose drafts.
 const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 function card(entry){
- const c=entry.content,e=make('article',undefined,'book reveal');
+ const c=entry.content,e=make('article',undefined,'book reveal visible');
  e.append(make('h2',c.title));
  for(const key of ['author','role','date','place','address','description','body','issues','excerpt']){
   if(c[key])e.append(make('p',c[key],'description'));
@@ -11,9 +10,13 @@ function card(entry){
  if(c.url){try{const url=new URL(c.url);if(['https:','http:'].includes(url.protocol)){const a=make('a','案内ページへ →','action');a.href=url.href;e.append(a);}}catch{}}
  return e;
 }
+let active=false;
+const legacyMain=document.getElementById('author-introduction')?.closest('main');
+const targets=()=>[...(legacyMain?[legacyMain]:[]),...document.querySelectorAll('#president,#vice,#members,#work-list,#local-detail,#local-list,#shelf,#about .reveal:last-child,#news .reveal:last-child')];
 try{
  const status=await fetch('/api/status',{cache:'no-store'});if(!status.ok)throw Error('no local backend');
- const config=await status.json();if(!config.localDemo)throw Error('no local backend');
+ const config=await status.json();if(!config.localDemo&&!config.publicSync)throw Error('no local backend');
+ active=true;targets().forEach(e=>e.replaceChildren(make('p','読み込み中…')));
  const result=await fetch('/api/public/entries',{cache:'no-store'});if(!result.ok)throw Error('API failed');
  const {items}=await result.json();
  const find=kind=>items.filter(e=>e.kind===kind);
@@ -32,6 +35,7 @@ try{
    const article=card(e),a=make('a','作品紹介を読む →','action');a.href='work-details.html?id='+encodeURIComponent(e.id);article.append(a);return article;
   }));
  }
+ if(legacyMain){const entry=find('introduction').find(e=>e.id==='seed-introduction');const link=make('a','作品紹介一覧へ ←','action');link.href='works.html';legacyMain.replaceChildren(make('h1','作品紹介'),entry?card(entry):make('p','この紹介は公開されていません。'),link);}
  const detail=document.getElementById('local-detail');
  if(detail){const id=new URLSearchParams(location.search).get('id');const entry=find('introduction').find(e=>e.id===id);detail.replaceChildren(entry?card(entry):make('p','この紹介は公開されていません。'));}
  const list=document.getElementById('local-list');
@@ -52,4 +56,4 @@ try{
  const news=document.querySelector('#news .reveal:last-child');
  if(news){const notices=items.filter(e=>['event','notice'].includes(e.kind));news.replaceChildren(...notices.map(e=>{const row=make('article',undefined,'news-row');row.append(make('span',e.content.date||''),make('span',e.kind==='event'?'イベント':'お知らせ','news-label'),make('p',e.content.title));return row;}));if(!notices.length)news.append(make('p','お知らせは準備中です。'));}
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)location.reload();});
-}catch{/* Plain static preview and public production keep the original content. */}
+}catch{if(active){targets().forEach(e=>e.replaceChildren(make('p','現在、内容を読み込めません。少し待ってから再読み込みしてください。')));document.getElementById('author-introduction')?.replaceChildren(make('p','現在、内容を読み込めません。'));}}
