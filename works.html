@@ -89,6 +89,16 @@
 <main id="main" class="wrap"><article class="story"><p class="eyebrow">書き手の言葉 / STORIES</p><h2 style="font-size:40px">作品紹介</h2><p>物語に添える、もうひとつの言葉。<br>書き手自身が綴る作品の紹介を集めました。</p><div id="work-list"></div><noscript><a href="chiisana-tokubetsu.html">小さな特別 — ルフィナ</a></noscript><a class="action" href="books.html">部誌の表紙と収録作品の目次はこちら →</a></article></main><footer class="footer"><div class="wrap footer-inner"><div class="footer-brand">文藝部</div><a href="#top">頁のはじめへ ↑</a></div></footer><script>
 // 希望する作者の作品紹介を追加します。1件をコピーして各項目を書き換えてください。
 // 紹介文の本体はurlで指定したHTMLの「作者から」欄に書きます。
-const WORKS = [{title:"小さな特別",author:"ルフィナ",issue:"燕雀 No.54",url:"chiisana-tokubetsu.html",summary:"作者による紹介は準備中です。冒頭の一部をご覧いただけます。"}];
-for(const work of WORKS){const card=document.createElement('section');card.className='author-note reveal';for(const [tag,text] of [['p',work.issue],['h2',work.title],['p',work.author],['p',work.summary]]){const el=document.createElement(tag);el.textContent=text;card.append(el);}const url=new URL(work.url,location.href);if(url.origin!==location.origin)continue;const a=document.createElement('a');a.className='action';a.href=url.href;a.textContent='作品紹介を読む →';card.append(a);document.getElementById('work-list').append(card);}
+const WORKS = [{title:"小さな特別",author:"ルフィナ",issue:"燕雀 No.54",url:"chiisana-tokubetsu.html",summary:"作者の紹介文は「作品紹介を読む」からご覧いただけます。"}];
+for(const work of WORKS){const card=document.createElement('section');card.className='author-note reveal';for(const [tag,text] of [['p',work.issue],['h2',work.title],['p',work.author],['p',work.summary]]){const el=document.createElement(tag);el.textContent=text;card.append(el);}const url=new URL(work.url,location.href);if(url.origin!==location.origin)continue;const a=document.createElement('a');a.className='action';a.href=url.href;a.textContent='作品紹介を読む →';card.append(a);document.getElementById('work-list').append(card);
+const summary = card.querySelectorAll('p')[2];
+fetch(url.href, {cache:'no-store'}).then(response => {if(!response.ok)throw new Error('Introduction unavailable');return response.text();}).then(html => {
+ const doc = new DOMParser().parseFromString(html,'text/html');
+ const first = doc.getElementById('author-introduction');
+ if(!first)return;
+ const paragraphs = [];
+ for(let node=first;node && node.tagName==='P';node=node.nextElementSibling){const text=node.textContent.trim();if(text)paragraphs.push(text);}
+ if(paragraphs.length)summary.textContent=paragraphs.join('\n\n');
+}).catch(()=>{});
+}
 </script></body></html>
