@@ -43,3 +43,12 @@ This is the Kanagawa University Literature Club's introductory website.
 ホームの文章は `index.html` の各セクションで編集できます。公開前に仮の内容と制作中表記を見直してください。
 
 GitHubへの変更後、Cloudflareのビルドが成功すると公開サイトに反映されます。
+
+## 希望する作者の作品紹介を追加する
+
+1. `chiisana-tokubetsu.html` をコピーし、作品ごとの新しいHTMLを作ります。
+2. 作品名・筆名・収録号・抜粋を変更します。紹介文は `id="author-introduction"` の段落に書きます。段落を増やす場合は `<p>紹介文</p>` を追加します。
+3. `works.html` の `WORKS` に一件を追加し、`title`、`author`、`issue`、`summary`、`url`（新しいHTMLのファイル名）を記入します。
+4. `books.html` の対象作品の `contents` に `url: "作品のファイル名.html"` を追加すると、目次から紹介へ移動できます。紹介のない作品は `url` を省略します。`excerpts` にも同じ `url` を指定できます。
+
+これはGitHubで編集・公開する方式です。サイト上の投稿フォームはありません。
