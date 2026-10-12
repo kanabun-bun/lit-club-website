@@ -37,6 +37,7 @@
     .search-field { flex:1; max-width:420px; }
     input,select { width:100%; min-height:44px; padding:9px 12px; color:var(--ink); background:#fff5; border:1px solid var(--line); border-radius:0; font-size:13px; }
     .count { margin:0 0 9px auto; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .shelf:has(> .book:only-child) { grid-template-columns:minmax(0,780px); justify-content:center; }
     .shelf { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:55px 45px; padding:55px 0 80px; }
     .book { min-width:0; border-bottom:1px solid var(--line); padding-bottom:28px; }
     .book-stage { height:310px; background:#e8e3d7; background-image:linear-gradient(90deg,#b2a68e15 1px,transparent 1px),linear-gradient(#b2a68e15 1px,transparent 1px); background-size:30px 30px; display:flex; justify-content:center; align-items:center; perspective:1000px; position:relative; margin-bottom:25px; }
@@ -93,10 +94,10 @@
 </head>
 <body id="top">
   <a class="skip" href="#main">本文へ移動</a>
-  <div class="notice">ただいま開巻準備中 ― 掲載内容は仮のものです</div>
+  <div class="notice">燕雀 No.54 ― 表紙・目次・作品の一部をご紹介</div>
   <header class="header"><div class="wrap header-inner">
     <a class="brand" href="index.html" aria-label="文藝部 ホーム"><span class="brand-seal" aria-hidden="true">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a>
-    <nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html" aria-current="page">作品目録</a><a href="index.html#visit">見学案内</a></nav>
+    <nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html" aria-current="page">作品目録</a><a href="works.html">作品紹介</a><a href="index.html#visit">見学案内</a></nav>
   </div></header>
   <main id="main" class="wrap">
     <section class="page-heading" aria-labelledby="page-title">
@@ -147,55 +148,110 @@
        ============================================================= */
     const BOOKS = [
       {
-        title: "残響",
-        heading: "文藝部誌 第12号『残響』",
-        category: "部誌 / 掲載例",
-        year: 2026,
-        published: "2026年11月（予定）",
-        price: "500円（仮）",
-        members: "6名（仮）",
-        description: "「音」をテーマにした短編小説・詩のアンソロジー。\n雨音、喫茶店のざわめき、誰かの記憶に残る旋律。それぞれの音から生まれた物語を集めました。",
-        cover: "",
-        color: "#294c57",
-        contents: [
-          { title: "雨音の喫茶店", author: "筆名一（仮）", genre: "短編小説", page: "4" },
-          { title: "遠い旋律", author: "筆名二（仮）", genre: "詩", page: "18" },
-          { title: "静寂のあとで", author: "筆名三（仮）", genre: "随筆", page: "24" }
-        ],
-        excerpts: [
-          {
-            title: "雨音の喫茶店（掲載例）",
-            author: "筆名一（仮）",
-            text: "雨が降ると、あの喫茶店を思い出す。\n窓辺の席で、冷めてゆく珈琲を前に、私たちは言葉の続きを探していた。\nあの日、言えなかった一言だけが、今も雨音の向こうに残っている。"
-          }
-        ],
-        shopUrl: ""
-      },
-      {
-        title: "境界線",
-        heading: "文藝部誌 第11号『境界線』",
-        category: "部誌 / 掲載例",
-        year: 2026,
-        published: "2026年5月（仮）",
-        price: "400円（仮）",
-        members: "5名（仮）",
-        description: "日常と非日常、大人と子供、夢と現実。\nさまざまな「境界」に焦点を当てた合同短編集です。",
-        cover: "",
-        color: "#963e30",
-        contents: [
-          { title: "夕暮れの境界", author: "筆名四（仮）", genre: "短編小説", page: "4" },
-          { title: "向こう岸", author: "筆名五（仮）", genre: "詩", page: "16" }
-        ],
-        excerpts: [
-          {
-            title: "夕暮れの境界（掲載例）",
-            author: "筆名四（仮）",
-            text: "橋の真ん中で、足を止めた。\n向こう岸には、昨日までの私が知らない夕暮れがある。\n一歩を踏み出すには、まだ少しだけ勇気が足りなかった。"
-          }
-        ],
-        shopUrl: ""
+            "title": "燕雀",
+            "heading": "燕雀 No.54",
+            "category": "神奈川大学文藝部 / 小説短編集",
+            "year": 2026,
+            "published": "2026年10月9日",
+            "price": "",
+            "members": "",
+            "description": "神奈川大学文藝部の小説短編集『燕雀』第54号。\n14作品と編集後記を収録。掲載作品の目次と、物語の入り口をご紹介します。",
+            "cover": "images/enjaku-54.jpg",
+            "color": "#789dab",
+            "contents": [
+                  {
+                        "title": "服",
+                        "author": "湊 徂徠",
+                        "page": "6"
+                  },
+                  {
+                        "title": "生は難く死は易し",
+                        "author": "ヒナタの影",
+                        "page": "12"
+                  },
+                  {
+                        "title": "「懐胎」",
+                        "author": "睡魔の悪巧み",
+                        "page": "20"
+                  },
+                  {
+                        "title": "スワンプマンの実行実験",
+                        "author": "大沢くく",
+                        "page": "28"
+                  },
+                  {
+                        "title": "小さな特別",
+                        "author": "ルフィナ",
+                        "page": "32",
+                        "url": "chiisana-tokubetsu.html"
+                  },
+                  {
+                        "title": "凍死体",
+                        "author": "片平 壱琉",
+                        "page": "42"
+                  },
+                  {
+                        "title": "家族",
+                        "author": "名立 ゆき",
+                        "page": "44"
+                  },
+                  {
+                        "title": "生きて",
+                        "author": "未熟人格",
+                        "page": "48"
+                  },
+                  {
+                        "title": "手紙",
+                        "author": "小沢",
+                        "page": "68"
+                  },
+                  {
+                        "title": "あなたのいる晩夏",
+                        "author": "カーニバル西口",
+                        "page": "72"
+                  },
+                  {
+                        "title": "勇者Ⅰミノの大冒険",
+                        "author": "綺麗ごと大好き",
+                        "page": "74"
+                  },
+                  {
+                        "title": "まだみどり共にあり",
+                        "author": "アランカ",
+                        "page": "76"
+                  },
+                  {
+                        "title": "憧れの勉強会",
+                        "author": "夏潮",
+                        "page": "88"
+                  },
+                  {
+                        "title": "換気扇の外側 無限に広がる",
+                        "author": "だいち",
+                        "page": "96"
+                  },
+                  {
+                        "title": "編集後記",
+                        "author": "",
+                        "page": "104"
+                  },
+                  {
+                        "title": "後付け",
+                        "author": "",
+                        "page": "105"
+                  }
+            ],
+            "excerpts": [
+                  {
+                        "title": "小さな特別",
+                        "author": "ルフィナ",
+                        "text": "鉄道が走るようになった。工場から煙が上がり、夜になれば街には電灯が灯る。電話なんてものまであるらしい。\nまったく、人間というのは忙しい。",
+                        "url": "chiisana-tokubetsu.html"
+                  }
+            ],
+            "shopUrl": ""
       }
-    ];
+];
 
     // ここから下は一覧を自動生成する処理です。通常は編集不要です。
     (() => {
@@ -257,7 +313,8 @@
         if (book.members) meta.append(make('span', '', '参加部員：' + book.members));
         const actions = make('div', 'actions');
         const shop = addLink(actions, book.shopUrl, '販売ページ');
-        if (!shop) actions.append(make('span', 'pending', '販売先は準備中です'));
+        if (!shop) actions.append(make('a', 'action', '頒布については部の案内へ'));
+        if (!shop) actions.lastChild.href = 'index.html#visit';
         article.append(stage, make('p', 'book-category', book.category || '作品集'), make('h2', '', book.heading || book.title), meta, make('p', 'description', book.description || ''));
         (book.excerpts || []).forEach(excerpt => {
           const section = make('section', 'excerpt');
@@ -269,15 +326,18 @@
             quote.append(make('span', 'excerpt-line', line));
           });
           section.append(quote, make('p', 'excerpt-note', '作品の一部抜粋です。続きは部誌でお楽しみください。'));
+          if (safeUrl(excerpt.url)) { const link = make('a', 'action', '作者による作品紹介へ →'); link.href = safeUrl(excerpt.url); section.append(link); }
           article.append(section);
         });
         if (book.contents && book.contents.length) {
           const contents = make('details', 'contents');
-          const summary = make('summary', '', '掲載作品はこちら — 目次をひらく');
+          const summary = make('summary', '', '収録作品はこちら — 目次をひらく');
           const list = make('ol', 'contents-list');
           book.contents.forEach(work => {
             const item = make('li', 'contents-item');
-            const name = make('div', 'contents-title', work.title || '無題');
+            const name = make('div', 'contents-title');
+            if (safeUrl(work.url)) { const link = make('a', 'action', work.title); link.href = safeUrl(work.url); name.append(link); }
+            else name.textContent = work.title || '無題';
             const info = [work.author, work.genre].filter(Boolean).join(' / ');
             if (info) name.append(make('span', 'contents-meta', info));
             item.append(name);
