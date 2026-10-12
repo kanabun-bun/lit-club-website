@@ -24,7 +24,7 @@
     .brand-seal { display:grid; place-items:center; width:35px; height:39px; border:1px solid var(--red); color:var(--red); font-size:20px; transform:rotate(-5deg); }
     .brand-name { font-size:25px; letter-spacing:.24em; }
     .brand small { display:block; font-size:9px; letter-spacing:.23em; color:var(--muted); }
-    nav { display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
+    nav { flex-wrap:wrap; display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
     nav a { padding:8px 0; border-bottom:1px solid transparent; transition:color .3s,border-color .3s; }
     nav a:hover,nav a[aria-current] { color:var(--red); border-color:var(--red); }
     .page-heading { position:relative; padding:75px 0 65px; overflow:hidden; }
@@ -97,7 +97,7 @@
   <div class="notice">燕雀 No.54 ― 表紙・目次・作品の一部をご紹介</div>
   <header class="header"><div class="wrap header-inner">
     <a class="brand" href="index.html" aria-label="文藝部 ホーム"><span class="brand-seal" aria-hidden="true">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a>
-    <nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html" aria-current="page">作品目録</a><a href="works.html">作品紹介</a><a href="index.html#visit">見学案内</a></nav>
+    <nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html" aria-current="page">作品目録</a><a href="works.html">作品紹介</a><a href="index.html#visit">見学案内</a><a href="members.html">部員のひとこと</a></nav>
   </div></header>
   <main id="main" class="wrap">
     <section class="page-heading" aria-labelledby="page-title">
