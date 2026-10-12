@@ -2,7 +2,8 @@ const $=id=>document.getElementById(id);
 const labels={introduction:'作品紹介',issue:'部誌',message:'部員のひとこと',event:'イベント',store:'冊子設置先',notice:'お知らせ',page:'活動紹介'};
 const fieldLabels={title:'見出し・名称',workId:'対象作品',author:'掲載名',body:'本文・紹介文',excerpt:'一般公開する短い抜粋',number:'号数',date:'日付・期間',description:'紹介文',contents:'目次（作品名・作者・ページを一行ずつ）',role:'役職',place:'会場',url:'案内URL',address:'住所',issues:'取り扱い部誌（一行ずつ）'};
 const fields={introduction:['title','workId','author','body','excerpt'],issue:['title','number','date','description','contents'],message:['title','role','author','body'],event:['title','date','place','body','url'],store:['title','address','body','url','issues'],notice:['title','date','body'],page:['title','body']};
-const demo=new URLSearchParams(location.search).has('demo');
+let demo=new URLSearchParams(location.search).has('demo');
+let localServer=false;
 let role='guest',pendingRole='member',entries=[],authors=[],works=[];
 function status(message){$('status').textContent=message;}
 async function api(path,options={}){
@@ -52,6 +53,8 @@ async function loadMember(){
 async function loadAdmin(){
  const result=await Promise.all([api('/api/admin/entries'),api('/api/admin/authors'),api('/api/admin/works')]);entries=result[0].items;authors=result[1].items;works=result[2].items;renderEntries();
  const select=$('work-form').elements.author_id;select.replaceChildren(element('option','作者を選択'));select.firstChild.value='';authors.forEach(a=>{const o=element('option',a.label+' ／ '+a.id);o.value=a.id;select.append(o);});
+ const pdfSelect=$('pdf-form').elements.work_id;pdfSelect.replaceChildren(element('option','作品を選択'));pdfSelect.firstChild.value='';works.forEach(w=>{const o=element('option',w.title+' ／ '+w.credited_name);o.value=w.id;pdfSelect.append(o);});
+ $('pdf-tools').hidden=!localServer;
 }
 function renderEntries(){
  const filtered=entries.filter(e=>!$('admin-kind').value||e.kind===$('admin-kind').value);
@@ -94,7 +97,12 @@ $('entry-form').onsubmit=async event=>{
   await loadAdmin();edit(entries.find(e=>e.id===id));status(action==='publish'?'公開しました。':action==='unpublish'?'公開を取り下げました。':'下書きを保存しました。');
  }catch(e){status(e.message);}finally{buttons.forEach(b=>b.disabled=false);}
 };
+$('pdf-form').elements.work_id.onchange=()=>{const w=works.find(w=>w.id===$('pdf-form').elements.work_id.value);$('pdf-form').elements.search_text.value=w?.search_text||'';$('pdf-form').elements.member_status.value=w?.member_status||'draft';};
+$('pdf-form').onsubmit=async event=>{event.preventDefault();const f=event.target;try{const id=f.elements.work_id.value;if(!id)throw Error('作品を選択してください');const file=f.elements.pdf.files[0];if(file){if(file.size>50000000)throw Error('PDFは50MB以内です');const r=await fetch('/api/admin/works/'+encodeURIComponent(id)+'/pdf',{method:'PUT',body:file,headers:{'Content-Type':'application/pdf'}});const data=await r.json();if(!r.ok)throw Error(data.error);}
+await api('/api/admin/works/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({member_status:f.elements.member_status.value,search_text:f.elements.search_text.value})});await loadAdmin();status('PDF・会員公開状態を保存しました。');f.elements.pdf.value='';}catch(e){status(e.message);}};
 window.clubPortalReady=true;
+try {const probe=await fetch('/api/status');if(probe.ok){const info=await probe.json();if(info.localDemo){demo=false;localServer=true;}}}catch{}
+if(localServer){$('banner').hidden=false;$('banner').textContent='PC内の保存付きデモです。部員: member-demo ／ 管理者: admin-demo。内容はこのPCだけに保存されます。';}
 if(demo){
  $('home-link').href='index.html?demo=1';
  $('banner').hidden=false;$('banner').textContent='画面確認用デモです。入力はこのタブのメモリ内だけで、再読み込みすると消えます。実際のログイン・DB保存・PDF登録は行いません。デモでは任意の入力で画面を確認できます。';

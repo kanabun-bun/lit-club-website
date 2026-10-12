@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="燕雀 No.54収録『小さな特別』、ルフィナによる作品紹介。"><title>作品紹介｜文藝部</title><style>
+    :root { --paper:#f4f0e6; --ink:#292e2b; --muted:#65685e; --red:#963e30; --line:#d2cbbc; --indigo:#294c57; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif; line-height:1.9; background-image:radial-gradient(#b2a68e20 .7px,transparent .7px); background-size:5px 5px; }
+    a { color:inherit; text-decoration:none; }
+    button,input,select { font:inherit; }
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--red); outline-offset:5px; }
+    ::selection { background:#d9b1a3; }
+    .wrap { width:min(1120px,calc(100% - 64px)); margin:auto; }
+    .skip { position:fixed; top:-100px; left:20px; z-index:50; background:var(--paper); padding:10px; }
+    .skip:focus { top:10px; }
+    .notice { background:var(--indigo); color:var(--paper); padding:7px 20px; text-align:center; font-size:11px; letter-spacing:.15em; }
+    .header { border-bottom:1px solid var(--line); background:var(--paper); }
+    .header-inner { min-height:86px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .brand { display:flex; align-items:center; gap:14px; }
+    .brand-seal { display:grid; place-items:center; width:35px; height:39px; border:1px solid var(--red); color:var(--red); font-size:20px; transform:rotate(-5deg); }
+    .brand-name { font-size:25px; letter-spacing:.24em; }
+    .brand small { display:block; font-size:9px; letter-spacing:.23em; color:var(--muted); }
+    nav { flex-wrap:wrap; display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
+    nav a { padding:8px 0; border-bottom:1px solid transparent; transition:color .3s,border-color .3s; }
+    nav a:hover,nav a[aria-current] { color:var(--red); border-color:var(--red); }
+    .page-heading { position:relative; padding:75px 0 65px; overflow:hidden; }
+    .eyebrow { font-size:11px; letter-spacing:.25em; color:var(--red); margin:0 0 20px; }
+    h1 { font-size:clamp(35px,5vw,55px); font-weight:500; letter-spacing:.25em; margin:0 0 20px; animation:ink 1.3s both; }
+    .intro { color:var(--muted); font-size:14px; line-height:2.3; max-width:620px; margin:0; animation:ink 1.3s .2s both; }
+    .heading-seal { position:absolute; right:15px; top:90px; writing-mode:vertical-rl; border:2px solid var(--red); padding:12px 7px; color:var(--red); font-size:21px; letter-spacing:.25em; transform:rotate(7deg); opacity:.7; }
+    .tools { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:22px 0; display:flex; align-items:flex-end; gap:20px; }
+    .field { display:grid; gap:6px; font-size:11px; letter-spacing:.1em; }
+    .search-field { flex:1; max-width:420px; }
+    input,select { width:100%; min-height:44px; padding:9px 12px; color:var(--ink); background:#fff5; border:1px solid var(--line); border-radius:0; font-size:13px; }
+    .count { margin:0 0 9px auto; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .shelf:has(> .book:only-child) { grid-template-columns:minmax(0,780px); justify-content:center; }
+    .shelf { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:55px 45px; padding:55px 0 80px; }
+    .book { min-width:0; border-bottom:1px solid var(--line); padding-bottom:28px; }
+    .book-stage { height:310px; background:#e8e3d7; background-image:linear-gradient(90deg,#b2a68e15 1px,transparent 1px),linear-gradient(#b2a68e15 1px,transparent 1px); background-size:30px 30px; display:flex; justify-content:center; align-items:center; perspective:1000px; position:relative; margin-bottom:25px; }
+    .book-cover { width:165px; height:235px; background:var(--cover,var(--indigo)); color:var(--paper); border-left:7px solid #0003; box-shadow:6px 6px 0 #d5cebd,15px 20px 23px #302e2726; position:relative; display:flex; align-items:center; justify-content:center; transform:rotate(-6deg); transition:transform .65s,box-shadow .65s; }
+    .book-stage:hover .book-cover { transform:rotate(0) rotateY(-12deg) translateY(-5px); box-shadow:8px 8px 0 #d5cebd,20px 25px 30px #302e2733; }
+    .book-cover::before { content:""; position:absolute; inset:12px; border:1px solid #f4f0e677; pointer-events:none; }
+    .cover-title { writing-mode:vertical-rl; font-size:27px; letter-spacing:.3em; max-height:195px; overflow:hidden; }
+    .cover-credit { position:absolute; bottom:20px; right:20px; writing-mode:vertical-rl; font-size:9px; letter-spacing:.2em; }
+    .cover-image { width:100%; height:100%; object-fit:contain; background:var(--paper); }
+    .stage-note { position:absolute; left:18px; bottom:12px; font-size:9px; letter-spacing:.15em; color:var(--muted); }
+    .book-category { font-size:10px; letter-spacing:.15em; color:var(--red); margin:0 0 8px; }
+    h2 { font-weight:500; font-size:23px; letter-spacing:.1em; margin:0 0 12px; overflow-wrap:anywhere; }
+    .meta { display:flex; flex-wrap:wrap; gap:4px 16px; color:var(--muted); font-size:11px; margin:0 0 15px; }
+    .description { font-size:13px; line-height:2.2; color:var(--muted); white-space:pre-line; overflow-wrap:anywhere; }
+    .actions { display:flex; flex-wrap:wrap; gap:12px 25px; margin-top:23px; }
+    .action { display:inline-flex; align-items:center; gap:20px; border-bottom:1px solid var(--ink); font-size:12px; padding:7px 0; transition:color .3s; }
+    .action:hover { color:var(--red); }
+    .action span { transition:transform .3s; }
+    .action:hover span { transform:translateX(4px); }
+    .excerpt { margin:25px 0 0; padding:25px 22px; background:#fff6; border-left:2px solid var(--red); }
+    .excerpt-label { color:var(--red); font-size:10px; letter-spacing:.2em; margin:0 0 12px; }
+    .excerpt h3 { font-size:17px; font-weight:500; letter-spacing:.12em; margin:0 0 6px; }
+    .excerpt-author { font-size:11px; color:var(--muted); margin:0 0 20px; }
+    .excerpt blockquote { margin:0; font-size:14px; line-height:2.4; overflow-wrap:anywhere; }
+    .excerpt-line { display:block; white-space:pre-wrap; }
+    .excerpt-line + .excerpt-line { margin-top:12px; }
+    .motion .excerpt-line { opacity:0; transform:translateY(12px); transition:opacity 1s ease,transform 1s ease; transition-delay:var(--delay,0s); }
+    .motion .excerpt-line.visible { opacity:1; transform:none; }
+    .excerpt-note { font-size:10px; color:var(--muted); margin:18px 0 0; letter-spacing:.1em; }
+    .contents { margin-top:25px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .contents summary { cursor:pointer; padding:17px 0; font-size:13px; letter-spacing:.1em; color:var(--red); }
+    .contents summary:focus-visible { outline:2px solid var(--red); outline-offset:4px; }
+    .contents-list { margin:0; padding:0 0 15px; list-style:none; }
+    .contents-item { display:flex; justify-content:space-between; align-items:baseline; gap:15px; padding:12px 0; border-top:1px dashed var(--line); }
+    .contents-title { font-size:14px; overflow-wrap:anywhere; }
+    .contents-meta { display:block; font-size:10px; color:var(--muted); margin-top:3px; }
+    .contents-page { font-size:11px; color:var(--muted); white-space:nowrap; }
+    .pending { font-size:11px; color:var(--muted); padding:7px 0; }
+    .empty { text-align:center; color:var(--muted); padding:50px 0 70px; }
+    [hidden] { display:none!important; }
+    .end-note { border-top:1px solid var(--line); padding:35px 0 65px; font-size:12px; color:var(--muted); }
+    .end-note a { border-bottom:1px solid var(--line); }
+    .footer { background:var(--ink); color:var(--paper); padding:40px 0; }
+    .footer-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+    .footer-brand { font-size:24px; letter-spacing:.3em; }
+    .footer p { font-size:10px; opacity:.65; letter-spacing:.15em; margin:8px 0 0; }
+    .footer a { font-size:12px; border-bottom:1px solid #f4f0e655; }
+    .reveal { animation:ink .8s both; }
+    @keyframes ink { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @media(max-width:700px) { .wrap{width:calc(100% - 40px)} .shelf{gap:35px 25px} .header-inner{min-height:75px} nav{gap:16px;font-size:12px} .brand-name{font-size:21px} .heading-seal{font-size:17px;right:5px} .intro{max-width:80%} .book-stage{height:280px} }
+    @media(max-width:500px) { .header-inner{flex-wrap:wrap;padding:15px 0;gap:12px} nav{width:100%;justify-content:space-between} .page-heading{padding:45px 0} .heading-seal{top:50px;font-size:15px} .intro{max-width:85%;font-size:13px} .tools{flex-wrap:wrap;gap:15px} .search-field{flex-basis:100%;max-width:none} .count{margin-bottom:10px} .shelf{grid-template-columns:1fr;padding-top:35px} .book-stage{height:310px} .notice{font-size:9px} .footer a{font-size:11px} }
+    @media(prefers-reduced-motion:reduce) { .motion .excerpt-line{opacity:1;transform:none}  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
+  
+.story {max-width:760px;margin:auto;padding:60px 0 90px}.story h1{writing-mode:vertical-rl;font-size:clamp(36px,8vw,60px);min-height:340px;letter-spacing:.25em;margin:0 auto 35px}.story-head{text-align:center}.story section{margin:45px 0}.author-note{padding:30px;background:#fff6;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.author-note p{white-space:pre-line;overflow-wrap:anywhere}.story blockquote{margin:0;line-height:2.5}.story blockquote p{animation:ink 1.5s both}.story blockquote p:nth-child(2){animation-delay:.25s}.issue{display:flex;align-items:center;gap:25px;padding:25px;background:#e8e3d7}.issue img{width:100px;height:auto}.issue p{font-size:13px}
+</style></head><body id="top"><a class="skip" href="#main">本文へ移動</a><header class="header"><div class="wrap header-inner"><a class="brand" href="index.html"><span class="brand-seal">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a><nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html">作品目録</a><a href="works.html">作品紹介</a><a href="members.html">部員のひとこと</a></nav></div></header>
+<main id="main" class="wrap"><section class="page-heading"><p class="eyebrow">文藝部のご案内</p><h1>参加イベント</h1></section><div id="local-list" class="shelf" data-kind="event"></div></main><footer class="footer"><div class="wrap footer-inner"><div class="footer-brand">文藝部</div><a href="#top">頁のはじめへ ↑</a></div></footer><script>
+if(new URLSearchParams(location.search).has('demo'))document.querySelectorAll('a[href]').forEach(a=>{try{const url=new URL(a.getAttribute('href'),location.href);if(url.origin===location.origin && url.pathname.endsWith('.html')){url.searchParams.set('demo','1');a.href=url.href;}}catch{}});
+</script><script type="module" src="./public-sync.js?v=1"></script></body></html>

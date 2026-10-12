@@ -1,0 +1,200 @@
+{
+  "authors": [
+    {
+      "id": "author-0",
+      "label": "湊 徂徠"
+    },
+    {
+      "id": "author-1",
+      "label": "ヒナタの影"
+    },
+    {
+      "id": "author-2",
+      "label": "睡魔の悪巧み"
+    },
+    {
+      "id": "author-3",
+      "label": "大沢くく"
+    },
+    {
+      "id": "author-4",
+      "label": "ルフィナ"
+    },
+    {
+      "id": "author-5",
+      "label": "片平 壱琉"
+    },
+    {
+      "id": "author-6",
+      "label": "名立 ゆき"
+    },
+    {
+      "id": "author-7",
+      "label": "未熟人格"
+    },
+    {
+      "id": "author-8",
+      "label": "小沢"
+    },
+    {
+      "id": "author-9",
+      "label": "カーニバル西口"
+    },
+    {
+      "id": "author-10",
+      "label": "綺麗ごと大好き"
+    },
+    {
+      "id": "author-11",
+      "label": "アランカ"
+    },
+    {
+      "id": "author-12",
+      "label": "夏潮"
+    },
+    {
+      "id": "author-13",
+      "label": "だいち"
+    }
+  ],
+  "works": [
+    {
+      "id": "work-0",
+      "author_id": "author-0",
+      "title": "服",
+      "credited_name": "湊 徂徠"
+    },
+    {
+      "id": "work-1",
+      "author_id": "author-1",
+      "title": "生は難く死は易し",
+      "credited_name": "ヒナタの影"
+    },
+    {
+      "id": "work-2",
+      "author_id": "author-2",
+      "title": "「懐胎」",
+      "credited_name": "睡魔の悪巧み"
+    },
+    {
+      "id": "work-3",
+      "author_id": "author-3",
+      "title": "スワンプマンの実行実験",
+      "credited_name": "大沢くく"
+    },
+    {
+      "id": "work-4",
+      "author_id": "author-4",
+      "title": "小さな特別",
+      "credited_name": "ルフィナ"
+    },
+    {
+      "id": "work-5",
+      "author_id": "author-5",
+      "title": "凍死体",
+      "credited_name": "片平 壱琉"
+    },
+    {
+      "id": "work-6",
+      "author_id": "author-6",
+      "title": "家族",
+      "credited_name": "名立 ゆき"
+    },
+    {
+      "id": "work-7",
+      "author_id": "author-7",
+      "title": "生きて",
+      "credited_name": "未熟人格"
+    },
+    {
+      "id": "work-8",
+      "author_id": "author-8",
+      "title": "手紙",
+      "credited_name": "小沢"
+    },
+    {
+      "id": "work-9",
+      "author_id": "author-9",
+      "title": "あなたのいる晩夏",
+      "credited_name": "カーニバル西口"
+    },
+    {
+      "id": "work-10",
+      "author_id": "author-10",
+      "title": "勇者Ⅰミノの大冒険",
+      "credited_name": "綺麗ごと大好き"
+    },
+    {
+      "id": "work-11",
+      "author_id": "author-11",
+      "title": "まだみどり共にあり",
+      "credited_name": "アランカ"
+    },
+    {
+      "id": "work-12",
+      "author_id": "author-12",
+      "title": "憧れの勉強会",
+      "credited_name": "夏潮"
+    },
+    {
+      "id": "work-13",
+      "author_id": "author-13",
+      "title": "換気扇の外側 無限に広がる",
+      "credited_name": "だいち"
+    }
+  ],
+  "entries": [
+    {
+      "id": "seed-issue",
+      "kind": "issue",
+      "content": {
+        "title": "燕雀 No.54",
+        "number": "54",
+        "date": "2026年10月9日",
+        "description": "神奈川大学文藝部の小説短編集『燕雀』第54号。\n14作品と編集後記を収録。掲載作品の目次と、物語の入り口をご紹介します。",
+        "contents": "服 ／ 湊 徂徠 ／ p.6\n生は難く死は易し ／ ヒナタの影 ／ p.12\n「懐胎」 ／ 睡魔の悪巧み ／ p.20\nスワンプマンの実行実験 ／ 大沢くく ／ p.28\n小さな特別 ／ ルフィナ ／ p.32\n凍死体 ／ 片平 壱琉 ／ p.42\n家族 ／ 名立 ゆき ／ p.44\n生きて ／ 未熟人格 ／ p.48\n手紙 ／ 小沢 ／ p.68\nあなたのいる晩夏 ／ カーニバル西口 ／ p.72\n勇者Ⅰミノの大冒険 ／ 綺麗ごと大好き ／ p.74\nまだみどり共にあり ／ アランカ ／ p.76\n憧れの勉強会 ／ 夏潮 ／ p.88\n換気扇の外側 無限に広がる ／ だいち ／ p.96\n編集後記 ／  ／ p.104\n後付け ／  ／ p.105"
+      }
+    },
+    {
+      "id": "seed-message-president-0",
+      "kind": "message",
+      "content": {
+        "title": "部長から",
+        "role": "部長",
+        "author": "名前・筆名は準備中",
+        "body": "部長からのメッセージは準備中です。"
+      }
+    },
+    {
+      "id": "seed-message-vice-0",
+      "kind": "message",
+      "content": {
+        "title": "副部長から",
+        "role": "副部長",
+        "author": "名前・筆名は準備中",
+        "body": "副部長からのメッセージは準備中です。"
+      }
+    },
+    {
+      "id": "seed-message-members-0",
+      "kind": "message",
+      "content": {
+        "title": "メンバーから",
+        "role": "メンバー",
+        "author": "ホームページ制作者",
+        "body": "夏はいつ終わるのでしょうか。"
+      }
+    },
+    {
+      "id": "seed-introduction",
+      "kind": "introduction",
+      "content": {
+        "title": "小さな特別",
+        "workId": "work-4",
+        "author": "ルフィナ",
+        "body": "普通とは？あたりまえとは？\n\nそんなものは環境に左右される意味のないもの。私にとって、あなたにとって、それが日常であるのならば。非日常であるのならば。\n\nあなただけの小さな幸せが見つけられますように。",
+        "excerpt": "鉄道が走るようになった。工場から煙が上がり、夜になれば街には電灯が灯る。電話なんてものまであるらしい。\nまったく、人間というのは忙しい。"
+      }
+    }
+  ]
+}

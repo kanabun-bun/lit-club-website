@@ -25,7 +25,7 @@
     <div class="wrap header-inner">
       <a class="brand" href="index.html" aria-label="文藝部 ホーム"><span class="brand-seal" aria-hidden="true">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="navigation">目次を開く</button>
-      <nav id="navigation" aria-label="メインナビゲーション"><a href="#about">部のこと</a><a href="#activities">活動の栞</a><a href="books.html">作品目録</a><a href="#visit">見学案内</a><a href="members.html">部員のひとこと</a><a class="member-entry" href="member-area.html">部員の方へ →</a></nav>
+      <nav id="navigation" aria-label="メインナビゲーション"><a href="#about">部のこと</a><a href="#activities">活動の栞</a><a href="books.html">作品目録</a><a href="#visit">見学案内</a><a href="members.html">部員のひとこと</a><a href="stores.html">設置先</a><a href="events.html">イベント</a><a class="member-entry" href="member-area.html">部員の方へ →</a></nav>
     </div>
   </header>
   <main id="main">
@@ -70,5 +70,5 @@
   </script>
 <script>
 if(new URLSearchParams(location.search).has('demo'))document.querySelectorAll('a[href]').forEach(a=>{try{const url=new URL(a.getAttribute('href'),location.href);if(url.origin===location.origin && url.pathname.endsWith('.html')){url.searchParams.set('demo','1');a.href=url.href;}}catch{}});
-</script></body>
+</script><script type="module" src="./public-sync.js?v=1"></script></body>
 </html>
