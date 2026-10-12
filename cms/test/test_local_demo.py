@@ -73,5 +73,26 @@ class LocalDemoTest(unittest.TestCase):
   self.assertEqual(self.request("/api/login","POST",{"role":"admin","password":"wrong"})[0],401)
   self.assertEqual(self.request("/member-area.html")[0],200)
   self.assertEqual(self.request("/api/status")[1]["localDemo"],True)
+ def test_work_author_edit_and_related_deletion(self):
+  self.login("admin")
+  author=self.request("/api/admin/authors","POST",{"label":"誤字","membership":"current"})[1]["id"]
+  self.assertEqual(self.request("/api/admin/authors/"+author,"PUT",{"label":"修正名","membership":"alumni"})[0],200)
+  work=self.request("/api/admin/works","POST",{"title":"誤った作品名","credited_name":"筆名","author_id":author})[1]["id"]
+  self.assertEqual(self.request("/api/admin/works/"+work,"PUT",{"title":"正しい作品名","credited_name":"新しい筆名","author_id":author})[0],200)
+  saved=next(x for x in self.request("/api/admin/works")[1]["items"] if x["id"]==work)
+  self.assertEqual(saved["title"],"正しい作品名")
+  self.assertEqual(self.request("/api/admin/authors/"+author,"DELETE")[0],409)
+  article=self.request("/api/admin/entries","POST",{"kind":"introduction","content":{"title":"紹介","workId":work,"body":"公開文章"}})[1]["id"]
+  self.assertEqual(self.request("/api/admin/works/"+work,"DELETE")[0],200)
+  self.assertFalse(any(x["id"]==article for x in self.request("/api/admin/entries")[1]["items"]))
+  self.assertEqual(self.request("/api/admin/authors/"+author,"DELETE")[0],200)
+ def test_entry_delete_requires_current_version_and_admin(self):
+  self.login("admin")
+  article=self.request("/api/admin/entries","POST",{"kind":"page","content":{"title":"活動","body":"ホームの文章"}})[1]["id"]
+  self.assertEqual(self.request("/api/admin/entries/"+article,"DELETE",{"version":2})[0],409)
+  self.login("member")
+  self.assertEqual(self.request("/api/admin/entries/"+article,"DELETE",{"version":1})[0],403)
+  self.login("admin")
+  self.assertEqual(self.request("/api/admin/entries/"+article,"DELETE",{"version":1})[0],200)
 
 if __name__=="__main__":unittest.main()

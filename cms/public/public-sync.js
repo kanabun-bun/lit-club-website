@@ -47,6 +47,8 @@ try{
   document.getElementById('tools').hidden=true;
   const count=document.getElementById('empty');count.hidden=books.length>0;
  }
+ const about=document.querySelector('#about .reveal:last-child');
+ if(about){const pages=find('page');about.replaceChildren(...pages.flatMap(e=>[make('h3',e.content.title),make('p',e.content.body||'')]));if(!pages.length)about.append(make('p','活動紹介は準備中です。'));}
  const news=document.querySelector('#news .reveal:last-child');
  if(news){const notices=items.filter(e=>['event','notice'].includes(e.kind));news.replaceChildren(...notices.map(e=>{const row=make('article',undefined,'news-row');row.append(make('span',e.content.date||''),make('span',e.kind==='event'?'イベント':'お知らせ','news-label'),make('p',e.content.title));return row;}));if(!notices.length)news.append(make('p','お知らせは準備中です。'));}
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)location.reload();});

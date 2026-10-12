@@ -48,12 +48,13 @@ class Store:
   self.lock = threading.RLock()
   self.db = sqlite3.connect(self.directory / "demo.sqlite3", check_same_thread=False)
   self.db.row_factory = sqlite3.Row
-  if not self.db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='entries'").fetchone():
+  fresh=not self.db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='entries'").fetchone()
+  if fresh:
    self.db.executescript((ROOT / "migrations/0001_cms.sql").read_text())
   self.secret = secrets.token_bytes(32)  # restart logs users out, records remain
   self.sessions = {}
   self.max_bytes = 8_500_000_000
-  if not self.db.execute("SELECT 1 FROM entries LIMIT 1").fetchone():
+  if fresh:
    seed_path=ROOT/"seed.json"
    seed=json.loads(seed_path.read_text()) if seed_path.exists() else {}
    for author in seed.get("authors",[]): self.db.execute("INSERT OR IGNORE INTO authors VALUES(?,?,?)",(author["id"],author["label"],"current"))
@@ -61,6 +62,16 @@ class Store:
    for entry in seed.get("entries",[]):
     value=json.dumps(entry["content"],ensure_ascii=False)
     self.db.execute("INSERT INTO entries VALUES(?,?,?,?,1,?)",(entry["id"],entry["kind"],value,value,str(time.time())))
+   self.db.commit()
+  if self.db.execute("PRAGMA user_version").fetchone()[0]<1:
+   if not self.db.execute("SELECT 1 FROM entries WHERE kind='page' LIMIT 1").fetchone():
+    seed_path=ROOT/"seed.json"
+    if seed_path.exists():
+     for entry in json.loads(seed_path.read_text()).get("entries",[]):
+      if entry["kind"]=="page":
+       value=json.dumps(entry["content"],ensure_ascii=False)
+       self.db.execute("INSERT OR IGNORE INTO entries VALUES(?,?,?,?,1,?)",(entry["id"],entry["kind"],value,value,str(time.time())))
+   self.db.execute("PRAGMA user_version=1")
    self.db.commit()
 
 class Handler(SimpleHTTPRequestHandler):
@@ -98,6 +109,7 @@ class Handler(SimpleHTTPRequestHandler):
  def do_GET(self): self.dispatch("GET")
  def do_POST(self): self.dispatch("POST")
  def do_PUT(self): self.dispatch("PUT")
+ def do_DELETE(self): self.dispatch("DELETE")
  def dispatch(self, method):
   host=urlsplit("http://"+self.headers.get("Host","")).hostname
   if host not in ("localhost","127.0.0.1"):
@@ -156,12 +168,37 @@ class Handler(SimpleHTTPRequestHandler):
     if not isinstance(x.get("title"),str) or not x["title"].strip() or len(x["title"])>200 or not isinstance(x.get("credited_name"),str) or not db.execute("SELECT 1 FROM authors WHERE id=?",(x.get("author_id"),)).fetchone():raise ValueError("作品と作者を確認してください")
     key=str(uuid.uuid4());db.execute("INSERT INTO works(id,author_id,title,credited_name,updated_at) VALUES(?,?,?,?,?)",(key,x["author_id"],x["title"].strip(),x["credited_name"],str(time.time())));db.commit();return self.reply({"id":key},201)
   work_parts=path.split("/")
+  if path.startswith("/api/admin/authors/") and len(work_parts)==5:
+   key=work_parts[4]
+   if not db.execute("SELECT 1 FROM authors WHERE id=?",(key,)).fetchone():return self.reply({"error":"作者がありません"},404)
+   if method=="PUT":
+    x=self.json_input()
+    if not isinstance(x.get("label"),str) or not x["label"].strip() or len(x["label"])>100 or x.get("membership") not in ("current","alumni"):raise ValueError("作者情報を確認してください")
+    db.execute("UPDATE authors SET label=?,membership=? WHERE id=?",(x["label"].strip(),x["membership"],key));db.commit();return self.reply({"ok":True})
+   if method=="DELETE":
+    if db.execute("SELECT 1 FROM works WHERE author_id=?",(key,)).fetchone():return self.reply({"error":"この作者に作品が残っています。先に作品の作者を変更するか、作品を削除してください"},409)
+    db.execute("DELETE FROM authors WHERE id=?",(key,));db.execute("INSERT INTO audit(action,target_id) VALUES('author-delete',?)",(key,));db.commit();return self.reply({"ok":True})
+  if path.startswith("/api/admin/works/") and len(work_parts)==5 and method=="DELETE":
+   key=work_parts[4];row=db.execute("SELECT * FROM works WHERE id=?",(key,)).fetchone()
+   if not row:return self.reply({"error":"作品がありません"},404)
+   # Remove linked introductions with the work, including published snapshots.
+   db.execute("DELETE FROM entries WHERE kind='introduction' AND (json_extract(draft_json,'$.workId')=? OR json_extract(published_json,'$.workId')=?)",(key,key))
+   db.execute("DELETE FROM works WHERE id=?",(key,));db.execute("INSERT INTO audit(action,target_id) VALUES('work-delete',?)",(key,));db.commit()
+   if row["pdf_key"]:
+    file=self.store.directory/"pdfs"/Path(row["pdf_key"]).name
+    try:file.unlink(missing_ok=True)
+    except OSError:return self.reply({"ok":True,"warning":"作品は削除しましたが、PDFファイルの整理に失敗しました"})
+   return self.reply({"ok":True})
   if path.startswith("/api/admin/works/") and len(work_parts)==5 and method=="PUT":
    x=self.json_input();key=work_parts[4]
-   if x.get("member_status") not in ("draft","published"):raise ValueError("会員公開状態を選んでください")
-   if not isinstance(x.get("search_text",""),str) or len(x.get("search_text",""))>1000000:raise ValueError("検索本文を確認してください")
    work=db.execute("SELECT * FROM works WHERE id=?",(key,)).fetchone()
    if not work:return self.reply({"error":"作品がありません"},404)
+   if "title" in x:
+    if not isinstance(x.get("title"),str) or not x["title"].strip() or len(x["title"])>200 or not isinstance(x.get("credited_name"),str) or len(x["credited_name"])>100 or not db.execute("SELECT 1 FROM authors WHERE id=?",(x.get("author_id"),)).fetchone():raise ValueError("作品と作者を確認してください")
+    db.execute("UPDATE works SET title=?,author_id=?,credited_name=?,updated_at=? WHERE id=?",(x["title"].strip(),x["author_id"],x["credited_name"].strip(),str(time.time()),key))
+    db.execute("INSERT INTO audit(action,target_id) VALUES('work-edit',?)",(key,));db.commit();return self.reply({"ok":True})
+   if x.get("member_status") not in ("draft","published"):raise ValueError("会員公開状態を選んでください")
+   if not isinstance(x.get("search_text",""),str) or len(x.get("search_text",""))>1000000:raise ValueError("検索本文を確認してください")
    if x["member_status"]=="published" and not work["pdf_key"]:raise ValueError("先にPDFを登録してください")
    db.execute("UPDATE works SET search_text=?,member_status=?,updated_at=? WHERE id=?",(x.get("search_text",""),x["member_status"],str(time.time()),key))
    db.execute("INSERT INTO audit(action,target_id) VALUES('work-save',?)",(key,));db.commit();return self.reply({"ok":True})
@@ -214,6 +251,11 @@ class Handler(SimpleHTTPRequestHandler):
    result=db.execute("UPDATE entries SET draft_json=?,published_json=?,version=version+1,updated_at=? WHERE id=? AND version=?",(json.dumps(value,ensure_ascii=False),published,str(time.time()),key,x.get("version")))
    if not result.rowcount:db.rollback();return self.reply({"error":"別の編集が入りました。一覧を再読み込みしてください"},409)
    db.execute("INSERT INTO audit(action,target_id) VALUES(?,?)",(x["action"],key));db.commit();return self.reply({"ok":True})
+  if path.startswith("/api/admin/entries/") and len(work_parts)==5 and method=="DELETE":
+   key=work_parts[4];x=self.json_input()
+   result=db.execute("DELETE FROM entries WHERE id=? AND version=?",(key,x.get("version")))
+   if not result.rowcount:db.rollback();return self.reply({"error":"別の編集が入りました。一覧を再読み込みしてください"},409)
+   db.execute("INSERT INTO audit(action,target_id) VALUES('entry-delete',?)",(key,));db.commit();return self.reply({"ok":True})
   return self.reply({"error":"未対応の操作です"},404)
  def validate_work(self,kind,value):
   if kind=="introduction" and not self.store.db.execute("SELECT 1 FROM works WHERE id=?",(value["workId"],)).fetchone():raise ValueError("対象作品がありません")
