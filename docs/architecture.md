@@ -6,7 +6,7 @@
 - Cloudflare Workers: 公開画面・会員画面・管理画面とAPI、認証・権限確認
 - Cloudflare D1: 部員ID・作品・部誌・紹介・イベント・店舗等のデータ
 - Cloudflare R2: 非公開PDFと表紙画像。公開画像と会員PDFを別のキー領域で扱う
-- 認証: 方式未確定。既存認証サービス/ライブラリを評価して採用する。自作の簡易パスワードチェックで代用しない
+- 認証:会員・管理者用の別々の共通パスワードをサーバー秘密情報として保持。HMAC署名、HttpOnly/Secure/SameSite Cookie、期限、IP単位の試行制限を実装した開発版を検証中。パスワード変更で既存セッションを無効化。
 
 ## 非公開PDFの経路
 ブラウザ → Workerでログイン・権限確認 → D1で作品の会員公開状態確認 → R2で該当PDF取得。
@@ -15,7 +15,7 @@ R2の公開URLは全文PDFに使わない。会員本文レスポンスは共有
 
 ## データモデル
 members: 作者の固定IDと現役/卒業生区分。
-accounts: 認証主体とmembersの対応・管理権限。作者記録はログインアカウント削除でも保持。
+開発版には部員個別アカウントを設けず、作者記録と共通閲覧ログインを分離。
 works: 作者ID、掲載名、作品名、検索本文、会員公開状態。
 work_files: PDFの保存キーと版。
 introductions: 公開用紹介・抜粋・下書き/公開状態。
@@ -40,3 +40,9 @@ SQLとR2の保存は単一トランザクションにできないため、失敗
 - https://developers.cloudflare.com/d1/
 - https://developers.cloudflare.com/r2/
 - https://developers.cloudflare.com/workers/runtime-apis/bindings/
+
+## 初期案からの変更
+現在の実装用SQLは cms/migrations/0001_cms.sql。design/schema-draft.sql は適用しない。
+公開情報はentriesの下書きと公開スナップショットに分け、個別記事種類の入力項目をAPIで検証する。
+GUIの目次はまずテキスト入力。作品IDでの目次編集、画像登録、PDFアップロード・抽出は次工程。
+詳しい実装済み/未実装一覧は cms/README.md に記載。
