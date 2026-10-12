@@ -34,18 +34,14 @@ function renderContent(kind,c){
  return card;
 }
 async function show(view){
- ['public','login','member','admin'].forEach(v=>$(v+'-view').hidden=true);
- $('logout').hidden=role==='guest';status('');
+ ['login','member','admin'].forEach(v=>$(v+'-view').hidden=true);
+ $('logout').hidden=role==='guest';$('member-nav').hidden=role==='guest';status('');
+ if(view==='admin' && role==='guest')view='member';
  if(view==='admin' && role!=='admin' || view==='member' && role==='guest'){
-  pendingRole=view==='admin'?'admin':'member';$('login-title').textContent=pendingRole==='admin'?'管理者ログイン':'会員ログイン';$('login-view').hidden=false;return;
+  pendingRole=view==='admin'?'admin':'member';$('login-title').textContent=pendingRole==='admin'?'管理者ログイン':'部員ログイン';$('login-view').hidden=false;return;
  }
  $(view+'-view').hidden=false;
- try{if(view==='public')await loadPublic();if(view==='member')await loadMember();if(view==='admin')await loadAdmin();}catch(e){status(e.message);}
-}
-async function loadPublic(){
- const {items}=await api('/api/public/entries');const q=$('public-search').value.normalize('NFKC').toLocaleLowerCase('ja'),kind=$('public-kind').value;
- const found=items.filter(e=>(!kind||e.kind===kind)&&Object.values(e.content).join(' ').normalize('NFKC').toLocaleLowerCase('ja').includes(q));
- $('public-list').replaceChildren(...found.map(e=>renderContent(e.kind,e.content)));if(!found.length)$('public-list').append(element('p','公開済みの情報がありません。'));
+ try{if(view==='member')await loadMember();if(view==='admin')await loadAdmin();}catch(e){status(e.message);}
 }
 async function loadMember(){
  const q=new FormData($('member-search')).get('q')||'';
@@ -77,14 +73,13 @@ function renderFields(content){
 function formContent(){const values=new FormData($('entry-form'));const c={};for(const field of fields[$('editor-kind').value])c[field]=String(values.get(field)||'');return c;}
 for(const [kind,label] of Object.entries(labels)){for(const id of ['editor-kind','admin-kind']){const o=element('option',label);o.value=kind;$(id).append(o);}}
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
-$('public-search').oninput=()=>loadPublic().catch(e=>status(e.message));$('public-kind').onchange=$('public-search').oninput;
 $('admin-kind').onchange=renderEntries;$('editor-kind').onchange=()=>renderFields({});
 $('new-entry').onclick=()=>edit(null);$('reload').onclick=()=>loadAdmin().catch(e=>status(e.message));
 $('new-author').onclick=()=>{$('author-form').hidden=false;$('work-form').hidden=true;};
 $('new-work').onclick=()=>{$('work-form').hidden=false;$('author-form').hidden=true;};
 $('preview-button').onclick=()=>{$('preview-body').replaceChildren(renderContent($('editor-kind').value,formContent()));$('preview').hidden=false;};
 $('login-form').onsubmit=async event=>{event.preventDefault();try{const x=await api('/api/login',{method:'POST',body:JSON.stringify({role:pendingRole,password:new FormData(event.target).get('password')})});role=x.role;event.target.reset();await show(role==='admin'?'admin':'member');}catch(e){status(e.message);}};
-$('logout').onclick=async()=>{try{await api('/api/logout',{method:'POST',body:'{}'});role='guest';entries=[];authors=[];works=[];$('entry-form').reset();$('entry-form').hidden=true;$('preview-body').replaceChildren();$('admin-list').replaceChildren();$('member-list').replaceChildren();await show('public');}catch(e){status(e.message);}};
+$('logout').onclick=async()=>{try{await api('/api/logout',{method:'POST',body:'{}'});role='guest';entries=[];authors=[];works=[];$('entry-form').reset();$('entry-form').hidden=true;$('preview-body').replaceChildren();$('admin-list').replaceChildren();$('member-list').replaceChildren();await show('member');}catch(e){status(e.message);}};
 $('member-search').onsubmit=event=>{event.preventDefault();loadMember().catch(e=>status(e.message));};
 for(const [id,path] of [['author-form','authors'],['work-form','works']])$(id).onsubmit=async event=>{event.preventDefault();try{await api('/api/admin/'+path,{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(event.target)))});event.target.reset();event.target.hidden=true;await loadAdmin();status('保存しました。');}catch(e){status(e.message);}};
 $('entry-form').onsubmit=async event=>{
@@ -100,7 +95,8 @@ $('entry-form').onsubmit=async event=>{
  }catch(e){status(e.message);}finally{buttons.forEach(b=>b.disabled=false);}
 };
 if(demo){
+ $('home-link').href='index.html?demo=1';
  $('banner').hidden=false;$('banner').textContent='画面確認用デモです。入力はこのタブのメモリ内だけで、再読み込みすると消えます。実際のログイン・DB保存・PDF登録は行いません。デモでは任意の入力で画面を確認できます。';
  entries=[{id:'sample',kind:'message',version:1,draft:{title:'部長からのご挨拶（架空の例）',role:'部長',author:'サンプル',body:'読むことも、書くことも。それぞれの言葉を大切にする場所へ。'},published:{title:'部長からのご挨拶（架空の例）',role:'部長',author:'サンプル',body:'読むことも、書くことも。それぞれの言葉を大切にする場所へ。'}}];
 }
-try{role=(await api('/api/session')).role;const config=await api('/api/status');if(!demo&&(!config.database||!config.auth)){$('banner').hidden=false;$('banner').textContent='初期設定待ちです。データベース・認証の接続後に利用できます。';}await show('public');}catch(e){status(e.message);}
+try{role=(await api('/api/session')).role;const config=await api('/api/status');if(!demo&&(!config.database||!config.auth)){$('banner').hidden=false;$('banner').textContent='初期設定待ちです。データベース・認証の接続後に利用できます。';}await show('member');}catch(e){status(e.message);}

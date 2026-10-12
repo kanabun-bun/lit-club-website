@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>部員のひとこと｜文藝部</title><meta name="description" content="部長・副部長・メンバーからのひとこと。文藝部の書き手たちをご紹介します。"><style>
+    :root { --paper:#f4f0e6; --ink:#292e2b; --muted:#65685e; --red:#963e30; --line:#d2cbbc; --indigo:#294c57; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif; line-height:1.9; background-image:radial-gradient(#b2a68e20 .7px,transparent .7px); background-size:5px 5px; }
+    a { color:inherit; text-decoration:none; }
+    button,input,select { font:inherit; }
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--red); outline-offset:5px; }
+    ::selection { background:#d9b1a3; }
+    .wrap { width:min(1120px,calc(100% - 64px)); margin:auto; }
+    .skip { position:fixed; top:-100px; left:20px; z-index:50; background:var(--paper); padding:10px; }
+    .skip:focus { top:10px; }
+    .notice { background:var(--indigo); color:var(--paper); padding:7px 20px; text-align:center; font-size:11px; letter-spacing:.15em; }
+    .header { border-bottom:1px solid var(--line); background:var(--paper); }
+    .header-inner { min-height:86px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .brand { display:flex; align-items:center; gap:14px; }
+    .brand-seal { display:grid; place-items:center; width:35px; height:39px; border:1px solid var(--red); color:var(--red); font-size:20px; transform:rotate(-5deg); }
+    .brand-name { font-size:25px; letter-spacing:.24em; }
+    .brand small { display:block; font-size:9px; letter-spacing:.23em; color:var(--muted); }
+    nav { display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
+    nav a { padding:8px 0; border-bottom:1px solid transparent; transition:color .3s,border-color .3s; }
+    nav a:hover,nav a[aria-current] { color:var(--red); border-color:var(--red); }
+    .page-heading { position:relative; padding:75px 0 65px; overflow:hidden; }
+    .eyebrow { font-size:11px; letter-spacing:.25em; color:var(--red); margin:0 0 20px; }
+    h1 { font-size:clamp(35px,5vw,55px); font-weight:500; letter-spacing:.25em; margin:0 0 20px; animation:ink 1.3s both; }
+    .intro { color:var(--muted); font-size:14px; line-height:2.3; max-width:620px; margin:0; animation:ink 1.3s .2s both; }
+    .heading-seal { position:absolute; right:15px; top:90px; writing-mode:vertical-rl; border:2px solid var(--red); padding:12px 7px; color:var(--red); font-size:21px; letter-spacing:.25em; transform:rotate(7deg); opacity:.7; }
+    .tools { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:22px 0; display:flex; align-items:flex-end; gap:20px; }
+    .field { display:grid; gap:6px; font-size:11px; letter-spacing:.1em; }
+    .search-field { flex:1; max-width:420px; }
+    input,select { width:100%; min-height:44px; padding:9px 12px; color:var(--ink); background:#fff5; border:1px solid var(--line); border-radius:0; font-size:13px; }
+    .count { margin:0 0 9px auto; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .shelf:has(> .book:only-child) { grid-template-columns:minmax(0,780px); justify-content:center; }
+    .shelf { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:55px 45px; padding:55px 0 80px; }
+    .book { min-width:0; border-bottom:1px solid var(--line); padding-bottom:28px; }
+    .book-stage { height:310px; background:#e8e3d7; background-image:linear-gradient(90deg,#b2a68e15 1px,transparent 1px),linear-gradient(#b2a68e15 1px,transparent 1px); background-size:30px 30px; display:flex; justify-content:center; align-items:center; perspective:1000px; position:relative; margin-bottom:25px; }
+    .book-cover { width:165px; height:235px; background:var(--cover,var(--indigo)); color:var(--paper); border-left:7px solid #0003; box-shadow:6px 6px 0 #d5cebd,15px 20px 23px #302e2726; position:relative; display:flex; align-items:center; justify-content:center; transform:rotate(-6deg); transition:transform .65s,box-shadow .65s; }
+    .book-stage:hover .book-cover { transform:rotate(0) rotateY(-12deg) translateY(-5px); box-shadow:8px 8px 0 #d5cebd,20px 25px 30px #302e2733; }
+    .book-cover::before { content:""; position:absolute; inset:12px; border:1px solid #f4f0e677; pointer-events:none; }
+    .cover-title { writing-mode:vertical-rl; font-size:27px; letter-spacing:.3em; max-height:195px; overflow:hidden; }
+    .cover-credit { position:absolute; bottom:20px; right:20px; writing-mode:vertical-rl; font-size:9px; letter-spacing:.2em; }
+    .cover-image { width:100%; height:100%; object-fit:contain; background:var(--paper); }
+    .stage-note { position:absolute; left:18px; bottom:12px; font-size:9px; letter-spacing:.15em; color:var(--muted); }
+    .book-category { font-size:10px; letter-spacing:.15em; color:var(--red); margin:0 0 8px; }
+    h2 { font-weight:500; font-size:23px; letter-spacing:.1em; margin:0 0 12px; overflow-wrap:anywhere; }
+    .meta { display:flex; flex-wrap:wrap; gap:4px 16px; color:var(--muted); font-size:11px; margin:0 0 15px; }
+    .description { font-size:13px; line-height:2.2; color:var(--muted); white-space:pre-line; overflow-wrap:anywhere; }
+    .actions { display:flex; flex-wrap:wrap; gap:12px 25px; margin-top:23px; }
+    .action { display:inline-flex; align-items:center; gap:20px; border-bottom:1px solid var(--ink); font-size:12px; padding:7px 0; transition:color .3s; }
+    .action:hover { color:var(--red); }
+    .action span { transition:transform .3s; }
+    .action:hover span { transform:translateX(4px); }
+    .excerpt { margin:25px 0 0; padding:25px 22px; background:#fff6; border-left:2px solid var(--red); }
+    .excerpt-label { color:var(--red); font-size:10px; letter-spacing:.2em; margin:0 0 12px; }
+    .excerpt h3 { font-size:17px; font-weight:500; letter-spacing:.12em; margin:0 0 6px; }
+    .excerpt-author { font-size:11px; color:var(--muted); margin:0 0 20px; }
+    .excerpt blockquote { margin:0; font-size:14px; line-height:2.4; overflow-wrap:anywhere; }
+    .excerpt-line { display:block; white-space:pre-wrap; }
+    .excerpt-line + .excerpt-line { margin-top:12px; }
+    .motion .excerpt-line { opacity:0; transform:translateY(12px); transition:opacity 1s ease,transform 1s ease; transition-delay:var(--delay,0s); }
+    .motion .excerpt-line.visible { opacity:1; transform:none; }
+    .excerpt-note { font-size:10px; color:var(--muted); margin:18px 0 0; letter-spacing:.1em; }
+    .contents { margin-top:25px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .contents summary { cursor:pointer; padding:17px 0; font-size:13px; letter-spacing:.1em; color:var(--red); }
+    .contents summary:focus-visible { outline:2px solid var(--red); outline-offset:4px; }
+    .contents-list { margin:0; padding:0 0 15px; list-style:none; }
+    .contents-item { display:flex; justify-content:space-between; align-items:baseline; gap:15px; padding:12px 0; border-top:1px dashed var(--line); }
+    .contents-title { font-size:14px; overflow-wrap:anywhere; }
+    .contents-meta { display:block; font-size:10px; color:var(--muted); margin-top:3px; }
+    .contents-page { font-size:11px; color:var(--muted); white-space:nowrap; }
+    .pending { font-size:11px; color:var(--muted); padding:7px 0; }
+    .empty { text-align:center; color:var(--muted); padding:50px 0 70px; }
+    [hidden] { display:none!important; }
+    .end-note { border-top:1px solid var(--line); padding:35px 0 65px; font-size:12px; color:var(--muted); }
+    .end-note a { border-bottom:1px solid var(--line); }
+    .footer { background:var(--ink); color:var(--paper); padding:40px 0; }
+    .footer-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+    .footer-brand { font-size:24px; letter-spacing:.3em; }
+    .footer p { font-size:10px; opacity:.65; letter-spacing:.15em; margin:8px 0 0; }
+    .footer a { font-size:12px; border-bottom:1px solid #f4f0e655; }
+    .reveal { animation:ink .8s both; }
+    @keyframes ink { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @media(max-width:700px) { .wrap{width:calc(100% - 40px)} .shelf{gap:35px 25px} .header-inner{min-height:75px} nav{gap:16px;font-size:12px} .brand-name{font-size:21px} .heading-seal{font-size:17px;right:5px} .intro{max-width:80%} .book-stage{height:280px} }
+    @media(max-width:500px) { .header-inner{flex-wrap:wrap;padding:15px 0;gap:12px} nav{width:100%;justify-content:space-between} .page-heading{padding:45px 0} .heading-seal{top:50px;font-size:15px} .intro{max-width:85%;font-size:13px} .tools{flex-wrap:wrap;gap:15px} .search-field{flex-basis:100%;max-width:none} .count{margin-bottom:10px} .shelf{grid-template-columns:1fr;padding-top:35px} .book-stage{height:310px} .notice{font-size:9px} .footer a{font-size:11px} }
+    @media(prefers-reduced-motion:reduce) { .motion .excerpt-line{opacity:1;transform:none}  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
+  
+nav{flex-wrap:wrap;gap:12px 22px}.messages{padding-bottom:70px}.message-section{padding:35px 0;border-top:1px solid var(--line)}.message-section h2{font-size:28px}.message-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:24px}.message-card{min-width:0;position:relative;padding:30px;background:#fff6;border:1px solid var(--line)}.message-role{color:var(--red);font-size:11px;letter-spacing:.2em}.message-card h3{font-size:22px;font-weight:500;margin:10px 0}.message-text{white-space:pre-line;overflow-wrap:anywhere;line-height:2.3;font-size:14px}.message-card::before{content:"";position:absolute;top:0;left:0;width:45px;height:2px;background:var(--red)}.message-card a{font-size:12px;border-bottom:1px solid var(--red)}.motion .message-card{opacity:0;transform:translateY(18px);transition:opacity .8s,transform .8s}.motion .message-card.visible{opacity:1;transform:none}
+@media(max-width:700px){.message-grid{grid-template-columns:1fr}.message-card{padding:24px}nav{gap:8px 14px}}@media(prefers-reduced-motion:reduce){.motion .message-card{opacity:1;transform:none}}
+</style></head><body id="top"><a class="skip" href="#main">本文へ移動</a><header class="header"><div class="wrap header-inner"><a class="brand" href="index.html"><span class="brand-seal">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a><nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html">作品目録</a><a href="works.html">作品紹介</a><a href="members.html" aria-current="page">部員のひとこと</a></nav></div></header><main id="main" class="wrap"><section class="page-heading"><p class="eyebrow">書き手たちの素顔 / MEMBERS</p><h1>部員のひとこと</h1><p class="intro">一人ひとりの言葉から、文藝部を知る。<br>私たちから、読んでくださるあなたへ。</p></section><div class="messages">
+<section class="message-section" aria-labelledby="president-title"><p class="eyebrow">其の一</p><h2 id="president-title">部長から</h2><div class="message-grid" id="president"></div></section>
+<section class="message-section" aria-labelledby="vice-title"><p class="eyebrow">其の二</p><h2 id="vice-title">副部長から</h2><div class="message-grid" id="vice"></div></section>
+<section class="message-section" aria-labelledby="member-title"><p class="eyebrow">其の三</p><h2 id="member-title">メンバーから</h2><div class="message-grid" id="members"></div></section>
+<noscript><p>部員のひとことを表示するにはJavaScriptを有効にしてください。</p></noscript></div><p class="end-note"><a href="works.html">部員が綴る作品の紹介はこちら →</a></p></main><footer class="footer"><div class="wrap footer-inner"><div class="footer-brand">文藝部</div><a href="#top">頁のはじめへ ↑</a></div></footer>
+<script>
+// 編集する場所：name（名前・筆名）、message（一言）を書き換えます。
+// 改行は \n。url は任意の作品紹介ページ。不要なら空欄。
+// members に {name, message, url} をコピーして人数を増やせます。
+const MESSAGES = {
+ president: [{name:"名前・筆名は準備中", message:"部長からのメッセージは準備中です。", url:""}],
+ vice: [{name:"名前・筆名は準備中", message:"副部長からのメッセージは準備中です。", url:""}],
+ members: [{name:"ホームページ制作者", message:"夏はいつ終わるのでしょうか。", url:""}]
+};
+for(const [group,people] of Object.entries(MESSAGES)){
+ const list=document.getElementById(group);
+ for(const person of people){
+  const card=document.createElement('article');card.className='message-card';
+  const role=document.createElement('p');role.className='message-role';role.textContent={president:'部長',vice:'副部長',members:'メンバー'}[group];
+  const name=document.createElement('h3');name.textContent=person.name;
+  const message=document.createElement('p');message.className='message-text';message.textContent=person.message;
+  card.append(role,name,message);
+  if(person.url){try{const url=new URL(person.url,location.href);if(url.origin===location.origin){const a=document.createElement('a');a.href=url.href;a.textContent='作品紹介へ →';card.append(a);}}catch{}}
+  list.append(card);
+ }
+}
+if('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+ const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target);}}),{threshold:0});
+ document.documentElement.classList.add('motion');
+ document.querySelectorAll('.message-card').forEach(card=>observer.observe(card));
+}
+</script><script>
+if(new URLSearchParams(location.search).has('demo'))document.querySelectorAll('a[href]').forEach(a=>{try{const url=new URL(a.getAttribute('href'),location.href);if(url.origin===location.origin && url.pathname.endsWith('.html')){url.searchParams.set('demo','1');a.href=url.href;}}catch{}});
+</script></body></html>
+

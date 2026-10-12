@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="文藝部の部誌・作品集を紹介する作品目録。収録作品の目次と短い抜粋、頒布情報をご案内します。">
+  <title>作品目録｜文藝部</title>
+  <style>
+    :root { --paper:#f4f0e6; --ink:#292e2b; --muted:#65685e; --red:#963e30; --line:#d2cbbc; --indigo:#294c57; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:"Yu Mincho","Hiragino Mincho ProN","Noto Serif JP",serif; line-height:1.9; background-image:radial-gradient(#b2a68e20 .7px,transparent .7px); background-size:5px 5px; }
+    a { color:inherit; text-decoration:none; }
+    button,input,select { font:inherit; }
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--red); outline-offset:5px; }
+    ::selection { background:#d9b1a3; }
+    .wrap { width:min(1120px,calc(100% - 64px)); margin:auto; }
+    .skip { position:fixed; top:-100px; left:20px; z-index:50; background:var(--paper); padding:10px; }
+    .skip:focus { top:10px; }
+    .notice { background:var(--indigo); color:var(--paper); padding:7px 20px; text-align:center; font-size:11px; letter-spacing:.15em; }
+    .header { border-bottom:1px solid var(--line); background:var(--paper); }
+    .header-inner { min-height:86px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .brand { display:flex; align-items:center; gap:14px; }
+    .brand-seal { display:grid; place-items:center; width:35px; height:39px; border:1px solid var(--red); color:var(--red); font-size:20px; transform:rotate(-5deg); }
+    .brand-name { font-size:25px; letter-spacing:.24em; }
+    .brand small { display:block; font-size:9px; letter-spacing:.23em; color:var(--muted); }
+    nav { flex-wrap:wrap; display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
+    nav a { padding:8px 0; border-bottom:1px solid transparent; transition:color .3s,border-color .3s; }
+    nav a:hover,nav a[aria-current] { color:var(--red); border-color:var(--red); }
+    .page-heading { position:relative; padding:75px 0 65px; overflow:hidden; }
+    .eyebrow { font-size:11px; letter-spacing:.25em; color:var(--red); margin:0 0 20px; }
+    h1 { font-size:clamp(35px,5vw,55px); font-weight:500; letter-spacing:.25em; margin:0 0 20px; animation:ink 1.3s both; }
+    .intro { color:var(--muted); font-size:14px; line-height:2.3; max-width:620px; margin:0; animation:ink 1.3s .2s both; }
+    .heading-seal { position:absolute; right:15px; top:90px; writing-mode:vertical-rl; border:2px solid var(--red); padding:12px 7px; color:var(--red); font-size:21px; letter-spacing:.25em; transform:rotate(7deg); opacity:.7; }
+    .tools { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:22px 0; display:flex; align-items:flex-end; gap:20px; }
+    .field { display:grid; gap:6px; font-size:11px; letter-spacing:.1em; }
+    .search-field { flex:1; max-width:420px; }
+    input,select { width:100%; min-height:44px; padding:9px 12px; color:var(--ink); background:#fff5; border:1px solid var(--line); border-radius:0; font-size:13px; }
+    .count { margin:0 0 9px auto; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .shelf:has(> .book:only-child) { grid-template-columns:minmax(0,780px); justify-content:center; }
+    .shelf { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:55px 45px; padding:55px 0 80px; }
+    .book { min-width:0; border-bottom:1px solid var(--line); padding-bottom:28px; }
+    .book-stage { height:310px; background:#e8e3d7; background-image:linear-gradient(90deg,#b2a68e15 1px,transparent 1px),linear-gradient(#b2a68e15 1px,transparent 1px); background-size:30px 30px; display:flex; justify-content:center; align-items:center; perspective:1000px; position:relative; margin-bottom:25px; }
+    .book-cover { width:165px; height:235px; background:var(--cover,var(--indigo)); color:var(--paper); border-left:7px solid #0003; box-shadow:6px 6px 0 #d5cebd,15px 20px 23px #302e2726; position:relative; display:flex; align-items:center; justify-content:center; transform:rotate(-6deg); transition:transform .65s,box-shadow .65s; }
+    .book-stage:hover .book-cover { transform:rotate(0) rotateY(-12deg) translateY(-5px); box-shadow:8px 8px 0 #d5cebd,20px 25px 30px #302e2733; }
+    .book-cover::before { content:""; position:absolute; inset:12px; border:1px solid #f4f0e677; pointer-events:none; }
+    .cover-title { writing-mode:vertical-rl; font-size:27px; letter-spacing:.3em; max-height:195px; overflow:hidden; }
+    .cover-credit { position:absolute; bottom:20px; right:20px; writing-mode:vertical-rl; font-size:9px; letter-spacing:.2em; }
+    .cover-image { width:100%; height:100%; object-fit:contain; background:var(--paper); }
+    .stage-note { position:absolute; left:18px; bottom:12px; font-size:9px; letter-spacing:.15em; color:var(--muted); }
+    .book-category { font-size:10px; letter-spacing:.15em; color:var(--red); margin:0 0 8px; }
+    h2 { font-weight:500; font-size:23px; letter-spacing:.1em; margin:0 0 12px; overflow-wrap:anywhere; }
+    .meta { display:flex; flex-wrap:wrap; gap:4px 16px; color:var(--muted); font-size:11px; margin:0 0 15px; }
+    .description { font-size:13px; line-height:2.2; color:var(--muted); white-space:pre-line; overflow-wrap:anywhere; }
+    .actions { display:flex; flex-wrap:wrap; gap:12px 25px; margin-top:23px; }
+    .action { display:inline-flex; align-items:center; gap:20px; border-bottom:1px solid var(--ink); font-size:12px; padding:7px 0; transition:color .3s; }
+    .action:hover { color:var(--red); }
+    .action span { transition:transform .3s; }
+    .action:hover span { transform:translateX(4px); }
+    .excerpt { margin:25px 0 0; padding:25px 22px; background:#fff6; border-left:2px solid var(--red); }
+    .excerpt-label { color:var(--red); font-size:10px; letter-spacing:.2em; margin:0 0 12px; }
+    .excerpt h3 { font-size:17px; font-weight:500; letter-spacing:.12em; margin:0 0 6px; }
+    .excerpt-author { font-size:11px; color:var(--muted); margin:0 0 20px; }
+    .excerpt blockquote { margin:0; font-size:14px; line-height:2.4; overflow-wrap:anywhere; }
+    .excerpt-line { display:block; white-space:pre-wrap; }
+    .excerpt-line + .excerpt-line { margin-top:12px; }
+    .motion .excerpt-line { opacity:0; transform:translateY(12px); transition:opacity 1s ease,transform 1s ease; transition-delay:var(--delay,0s); }
+    .motion .excerpt-line.visible { opacity:1; transform:none; }
+    .excerpt-note { font-size:10px; color:var(--muted); margin:18px 0 0; letter-spacing:.1em; }
+    .contents { margin-top:25px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .contents summary { cursor:pointer; padding:17px 0; font-size:13px; letter-spacing:.1em; color:var(--red); }
+    .contents summary:focus-visible { outline:2px solid var(--red); outline-offset:4px; }
+    .contents-list { margin:0; padding:0 0 15px; list-style:none; }
+    .contents-item { display:flex; justify-content:space-between; align-items:baseline; gap:15px; padding:12px 0; border-top:1px dashed var(--line); }
+    .contents-title { font-size:14px; overflow-wrap:anywhere; }
+    .contents-meta { display:block; font-size:10px; color:var(--muted); margin-top:3px; }
+    .contents-page { font-size:11px; color:var(--muted); white-space:nowrap; }
+    .pending { font-size:11px; color:var(--muted); padding:7px 0; }
+    .empty { text-align:center; color:var(--muted); padding:50px 0 70px; }
+    [hidden] { display:none!important; }
+    .end-note { border-top:1px solid var(--line); padding:35px 0 65px; font-size:12px; color:var(--muted); }
+    .end-note a { border-bottom:1px solid var(--line); }
+    .footer { background:var(--ink); color:var(--paper); padding:40px 0; }
+    .footer-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+    .footer-brand { font-size:24px; letter-spacing:.3em; }
+    .footer p { font-size:10px; opacity:.65; letter-spacing:.15em; margin:8px 0 0; }
+    .footer a { font-size:12px; border-bottom:1px solid #f4f0e655; }
+    .reveal { animation:ink .8s both; }
+    @keyframes ink { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @media(max-width:700px) { .wrap{width:calc(100% - 40px)} .shelf{gap:35px 25px} .header-inner{min-height:75px} nav{gap:16px;font-size:12px} .brand-name{font-size:21px} .heading-seal{font-size:17px;right:5px} .intro{max-width:80%} .book-stage{height:280px} }
+    @media(max-width:500px) { .header-inner{flex-wrap:wrap;padding:15px 0;gap:12px} nav{width:100%;justify-content:space-between} .page-heading{padding:45px 0} .heading-seal{top:50px;font-size:15px} .intro{max-width:85%;font-size:13px} .tools{flex-wrap:wrap;gap:15px} .search-field{flex-basis:100%;max-width:none} .count{margin-bottom:10px} .shelf{grid-template-columns:1fr;padding-top:35px} .book-stage{height:310px} .notice{font-size:9px} .footer a{font-size:11px} }
+    @media(prefers-reduced-motion:reduce) { .motion .excerpt-line{opacity:1;transform:none}  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
+  </style>
+</head>
+<body id="top">
+  <a class="skip" href="#main">本文へ移動</a>
+  <div class="notice">燕雀 No.54 ― 表紙・目次・作品の一部をご紹介</div>
+  <header class="header"><div class="wrap header-inner">
+    <a class="brand" href="index.html" aria-label="文藝部 ホーム"><span class="brand-seal" aria-hidden="true">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a>
+    <nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html" aria-current="page">作品目録</a><a href="works.html">作品紹介</a><a href="index.html#visit">見学案内</a><a href="members.html">部員のひとこと</a></nav>
+  </div></header>
+  <main id="main" class="wrap">
+    <section class="page-heading" aria-labelledby="page-title">
+      <p class="eyebrow">文藝部の本棚 / PUBLICATIONS</p>
+      <h1 id="page-title">作品目録</h1>
+      <p class="intro">一冊に、いくつもの世界。<br>私たちが綴ってきた部誌と作品集を、ここに。<br>短い抜粋と目次から、気になる一冊を見つけてください。</p>
+      <span class="heading-seal" aria-hidden="true">文藝蔵書</span>
+    </section>
+    <div class="tools" id="tools" hidden>
+      <label class="field search-field">作品を探す<input id="search" type="search" placeholder="誌名・掲載作品名・作者名から検索"></label>
+      <label class="field">発行年<select id="year"><option value="">すべての年</option></select></label>
+      <p class="count" id="count" role="status" aria-live="polite"></p>
+    </div>
+    <div class="shelf" id="shelf"></div>
+    <p class="empty" id="empty" hidden>条件に合う作品がありません。検索語や発行年を変更してください。</p>
+    <noscript><p>作品一覧の表示にはJavaScriptを使用しています。ブラウザのJavaScriptを有効にしてご覧ください。</p></noscript>
+    <div class="end-note">部誌の頒布・お問い合わせについては、<a href="index.html#visit">ホームの案内</a>をご覧ください。</div>
+  </main>
+  <footer class="footer"><div class="wrap footer-inner"><div><div class="footer-brand">文藝部</div><p>言葉で紡ぐ、私たちの世界。</p><p>© 2026 文藝部</p></div><a href="#top">頁のはじめへ ↑</a></div></footer>
+
+  <script>
+    /* =============================================================
+       部誌の追加・編集は、この BOOKS の中だけでできます。
+       下の1冊分 { ... } をコピーし、配列の先頭または末尾に追加します。
+       各冊の間にはカンマ「,」が必要です。表示順はこの配列の順です。
+
+       title       : 表紙に表示する誌名
+       heading     : 一覧に表示する正式名称
+       category    : 「部誌」「詩集」など
+       year        : 発行年（数字）。発行年の絞り込みに使います
+       published   : 発行時期の表示。予定の場合は「予定」と書きます
+       price       : 「500円」「無料」「未定」など
+       members     : 「6名」など。空欄なら表示しません
+       description : 紹介文。改行を入れる場合は \n を使います
+       cover       : 表紙画像のパス。例「images/zankyo.jpg」
+                     空欄・画像の読み込み失敗時は仮表紙を表示します
+       color       : 仮表紙の色（# で始まる6桁のカラーコード）
+       contents    : 目次。作品を { title, author, genre, page } で追加します
+                     page は任意です。作品ごとの全文は載せません
+       excerpts    : 公開する短い抜粋。{ title, author, text } で追加します
+                     text は公開してよい部分だけ記入してください
+                     改行は \n。未掲載なら [] にします
+       shopUrl     : BOOTHなどの販売ページURL
+                     リンクが未定なら空欄にします。ボタンは表示しません
+
+       表紙画像はGitHubのリポジトリにアップロードしてください。
+       公開前にサンプルの内容と上部の制作中表記を変更してください。
+       ============================================================= */
+    const BOOKS = [
+      {
+            "title": "燕雀",
+            "heading": "燕雀 No.54",
+            "category": "神奈川大学文藝部 / 小説短編集",
+            "year": 2026,
+            "published": "2026年10月9日",
+            "price": "",
+            "members": "",
+            "description": "神奈川大学文藝部の小説短編集『燕雀』第54号。\n14作品と編集後記を収録。掲載作品の目次と、物語の入り口をご紹介します。",
+            "cover": "images/enjaku-54.jpg",
+            "color": "#789dab",
+            "contents": [
+                  {
+                        "title": "服",
+                        "author": "湊 徂徠",
+                        "page": "6"
+                  },
+                  {
+                        "title": "生は難く死は易し",
+                        "author": "ヒナタの影",
+                        "page": "12"
+                  },
+                  {
+                        "title": "「懐胎」",
+                        "author": "睡魔の悪巧み",
+                        "page": "20"
+                  },
+                  {
+                        "title": "スワンプマンの実行実験",
+                        "author": "大沢くく",
+                        "page": "28"
+                  },
+                  {
+                        "title": "小さな特別",
+                        "author": "ルフィナ",
+                        "page": "32",
+                        "url": "chiisana-tokubetsu.html"
+                  },
+                  {
+                        "title": "凍死体",
+                        "author": "片平 壱琉",
+                        "page": "42"
+                  },
+                  {
+                        "title": "家族",
+                        "author": "名立 ゆき",
+                        "page": "44"
+                  },
+                  {
+                        "title": "生きて",
+                        "author": "未熟人格",
+                        "page": "48"
+                  },
+                  {
+                        "title": "手紙",
+                        "author": "小沢",
+                        "page": "68"
+                  },
+                  {
+                        "title": "あなたのいる晩夏",
+                        "author": "カーニバル西口",
+                        "page": "72"
+                  },
+                  {
+                        "title": "勇者Ⅰミノの大冒険",
+                        "author": "綺麗ごと大好き",
+                        "page": "74"
+                  },
+                  {
+                        "title": "まだみどり共にあり",
+                        "author": "アランカ",
+                        "page": "76"
+                  },
+                  {
+                        "title": "憧れの勉強会",
+                        "author": "夏潮",
+                        "page": "88"
+                  },
+                  {
+                        "title": "換気扇の外側 無限に広がる",
+                        "author": "だいち",
+                        "page": "96"
+                  },
+                  {
+                        "title": "編集後記",
+                        "author": "",
+                        "page": "104"
+                  },
+                  {
+                        "title": "後付け",
+                        "author": "",
+                        "page": "105"
+                  }
+            ],
+            "excerpts": [
+                  {
+                        "title": "小さな特別",
+                        "author": "ルフィナ",
+                        "text": "鉄道が走るようになった。工場から煙が上がり、夜になれば街には電灯が灯る。電話なんてものまであるらしい。\nまったく、人間というのは忙しい。",
+                        "url": "chiisana-tokubetsu.html"
+                  }
+            ],
+            "shopUrl": ""
+      }
+];
+
+    // ここから下は一覧を自動生成する処理です。通常は編集不要です。
+    (() => {
+      const shelf = document.getElementById('shelf');
+      const search = document.getElementById('search');
+      const year = document.getElementById('year');
+      const count = document.getElementById('count');
+      const empty = document.getElementById('empty');
+      const make = (tag, className, text) => {
+        const element = document.createElement(tag);
+        if (className) element.className = className;
+        if (text !== undefined) element.textContent = String(text);
+        return element;
+      };
+      const safeUrl = value => {
+        if (typeof value !== 'string' || !value.trim()) return '';
+        try {
+          const url = new URL(value.trim(), window.location.href);
+          return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+        } catch { return ''; }
+      };
+      const addLink = (container, value, label) => {
+        const url = safeUrl(value);
+        if (!url) return false;
+        const link = make('a', 'action', label);
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', label + '（新しいタブで開きます）');
+        link.append(make('span', '', '↗'));
+        container.append(link);
+        return true;
+      };
+      const createBook = book => {
+        const article = make('article', 'book reveal');
+        const stage = make('div', 'book-stage');
+        const cover = make('div', 'book-cover');
+        cover.setAttribute('aria-hidden', 'true');
+        if (/^#[0-9a-f]{6}$/i.test(book.color || '')) cover.style.setProperty('--cover', book.color);
+        const placeholder = () => {
+          cover.replaceChildren(make('span', 'cover-title', book.title), make('span', 'cover-credit', '文藝部 作品集'));
+        };
+        placeholder();
+        const imageUrl = safeUrl(book.cover);
+        const stageNote = make('span', 'stage-note', '仮表紙');
+        if (imageUrl) {
+          const image = make('img', 'cover-image');
+          image.alt = '';
+          image.loading = 'lazy';
+          image.addEventListener('load', () => { stageNote.textContent = '表紙'; });
+          image.addEventListener('error', placeholder, { once: true });
+          image.src = imageUrl;
+          cover.replaceChildren(image);
+        }
+        stage.append(cover, stageNote);
+        const meta = make('p', 'meta');
+        if (book.published) meta.append(make('span', '', '発行：' + book.published));
+        if (book.price) meta.append(make('span', '', '頒布価格：' + book.price));
+        if (book.members) meta.append(make('span', '', '参加部員：' + book.members));
+        const actions = make('div', 'actions');
+        const shop = addLink(actions, book.shopUrl, '販売ページ');
+        if (!shop) actions.append(make('a', 'action', '頒布については部の案内へ'));
+        if (!shop) actions.lastChild.href = 'index.html#visit';
+        article.append(stage, make('p', 'book-category', book.category || '作品集'), make('h2', '', book.heading || book.title), meta, make('p', 'description', book.description || ''));
+        (book.excerpts || []).forEach(excerpt => {
+          const section = make('section', 'excerpt');
+          section.append(make('p', 'excerpt-label', '物語のひとしずく / EXCERPT'), make('h3', '', excerpt.title || '作品抜粋'));
+          if (excerpt.author) section.append(make('p', 'excerpt-author', excerpt.author));
+          const quote = make('blockquote');
+          String(excerpt.text || '').split('\n').forEach(line => {
+            if (!line.trim()) return;
+            quote.append(make('span', 'excerpt-line', line));
+          });
+          section.append(quote, make('p', 'excerpt-note', '作品の一部抜粋です。続きは部誌でお楽しみください。'));
+          if (safeUrl(excerpt.url)) { const link = make('a', 'action', '作者による作品紹介へ →'); link.href = safeUrl(excerpt.url); section.append(link); }
+          article.append(section);
+        });
+        if (book.contents && book.contents.length) {
+          const contents = make('details', 'contents');
+          const summary = make('summary', '', '収録作品はこちら — 目次をひらく');
+          const list = make('ol', 'contents-list');
+          book.contents.forEach(work => {
+            const item = make('li', 'contents-item');
+            const name = make('div', 'contents-title');
+            if (safeUrl(work.url)) { const link = make('a', 'action', work.title); link.href = safeUrl(work.url); name.append(link); }
+            else name.textContent = work.title || '無題';
+            const info = [work.author, work.genre].filter(Boolean).join(' / ');
+            if (info) name.append(make('span', 'contents-meta', info));
+            item.append(name);
+            if (work.page) item.append(make('span', 'contents-page', 'p. ' + work.page));
+            list.append(item);
+          });
+          contents.append(summary, list);
+          article.append(contents);
+        }
+        article.append(actions);
+        return article;
+      };
+      const years = [...new Set(BOOKS.map(book => book.year).filter(Number.isInteger))].sort((a, b) => b - a);
+      years.forEach(value => { const option = make('option', '', value + '年'); option.value = value; year.append(option); });
+      const normalize = value => String(value).normalize('NFKC').toLocaleLowerCase('ja').trim();
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const observer = !reduced.matches && 'IntersectionObserver' in window
+        ? new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+            });
+          }, { threshold: 0, rootMargin: '0px 0px -15px 0px' }) : null;
+      if (observer) document.documentElement.classList.add('motion');
+      const render = () => {
+        const query = normalize(search.value);
+        const books = BOOKS.filter(book => (!year.value || String(book.year) === year.value) && normalize([book.title, book.heading, book.category, book.description, ...(book.contents || []).flatMap(work => [work.title, work.author]), ...(book.excerpts || []).flatMap(work => [work.title, work.author])].join(' ')).includes(query));
+        if (observer) observer.disconnect();
+        shelf.replaceChildren(...books.map(createBook));
+        if (observer) shelf.querySelectorAll('.excerpt').forEach(section => {
+          section.querySelectorAll('.excerpt-line').forEach((line, index) => {
+            line.style.setProperty('--delay', Math.min(index, 4) * .12 + 's');
+            observer.observe(line);
+          });
+        });
+        count.textContent = books.length + '冊 / 全' + BOOKS.length + '冊';
+        empty.hidden = books.length > 0;
+        shelf.hidden = books.length === 0;
+      };
+      search.addEventListener('input', render);
+      year.addEventListener('change', render);
+      render();
+      document.getElementById('tools').hidden = false;
+    })();
+  </script>
+<script>
+if(new URLSearchParams(location.search).has('demo'))document.querySelectorAll('a[href]').forEach(a=>{try{const url=new URL(a.getAttribute('href'),location.href);if(url.origin===location.origin && url.pathname.endsWith('.html')){url.searchParams.set('demo','1');a.href=url.href;}}catch{}});
+</script></body>
+</html>
+
