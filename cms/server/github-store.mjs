@@ -22,9 +22,9 @@ export function validateState(state){
 }
 export function githubConfigured(env){return /^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_DATA_REPO||'')&&!!env.GITHUB_TOKEN&&!!env.GITHUB_DATA_BRANCH;}
 export class GitHubStore {
- constructor(env,fetcher=fetch){this.env=env;this.fetcher=fetcher;this.root='https://api.github.com/repos/'+env.GITHUB_DATA_REPO;}
+ constructor(env,fetcher=fetch){this.env=env;this.fetcher=fetcher.bind(globalThis);this.root='https://api.github.com/repos/'+env.GITHUB_DATA_REPO;}
  async request(path,options={},raw=false){
-  const response=await this.fetcher(this.root+path,{...options,redirect:'error',signal:AbortSignal.timeout(20000),headers:{Accept:raw?'application/vnd.github.raw+json':'application/vnd.github+json',Authorization:'Bearer '+this.env.GITHUB_TOKEN,'X-GitHub-Api-Version':'2022-11-28','User-Agent':'lit-club-cms','Content-Type':'application/json',...options.headers}});
+  const response=await this.fetcher(this.root+path,{...options,redirect:'manual',signal:AbortSignal.timeout(20000),headers:{Accept:raw?'application/vnd.github.raw+json':'application/vnd.github+json',Authorization:'Bearer '+this.env.GITHUB_TOKEN,'X-GitHub-Api-Version':'2022-11-28','User-Agent':'lit-club-cms','Content-Type':'application/json',...options.headers}});
   if(!response.ok){if(response.status===409||response.status===422)throw new HttpError(409,'別の更新が入りました。一覧を再読み込みしてください');if(response.status===403||response.status===429)throw new HttpError(503,'GitHubの権限または利用上限を確認してください');if(response.status===404)throw new HttpError(503,'保存先または初期データが見つかりません');throw new HttpError(503,'GitHubへの接続を完了できませんでした');}
   return raw?response:response.json();
  }
