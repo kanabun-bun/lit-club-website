@@ -17,7 +17,7 @@
     .brand-seal { display:grid; place-items:center; width:35px; height:39px; border:1px solid var(--red); color:var(--red); font-size:20px; transform:rotate(-5deg); }
     .brand-name { font-size:25px; letter-spacing:.24em; }
     .brand small { display:block; font-size:9px; letter-spacing:.23em; color:var(--muted); }
-    nav { display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
+    nav { flex-wrap:wrap; display:flex; gap:28px; font-size:13px; letter-spacing:.1em; }
     nav a { padding:8px 0; border-bottom:1px solid transparent; transition:color .3s,border-color .3s; }
     nav a:hover,nav a[aria-current] { color:var(--red); border-color:var(--red); }
     .page-heading { position:relative; padding:75px 0 65px; overflow:hidden; }
@@ -85,7 +85,7 @@
     @media(prefers-reduced-motion:reduce) { .motion .excerpt-line{opacity:1;transform:none}  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important} }
   
 .story {max-width:760px;margin:auto;padding:60px 0 90px}.story h1{writing-mode:vertical-rl;font-size:clamp(36px,8vw,60px);min-height:340px;letter-spacing:.25em;margin:0 auto 35px}.story-head{text-align:center}.story section{margin:45px 0}.author-note{padding:30px;background:#fff6;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.author-note p{white-space:pre-line;overflow-wrap:anywhere}.story blockquote{margin:0;line-height:2.5}.story blockquote p{animation:ink 1.5s both}.story blockquote p:nth-child(2){animation-delay:.25s}.issue{display:flex;align-items:center;gap:25px;padding:25px;background:#e8e3d7}.issue img{width:100px;height:auto}.issue p{font-size:13px}
-</style></head><body id="top"><a class="skip" href="#main">本文へ移動</a><header class="header"><div class="wrap header-inner"><a class="brand" href="index.html"><span class="brand-seal">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a><nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html">作品目録</a><a href="works.html">作品紹介</a></nav></div></header>
+</style></head><body id="top"><a class="skip" href="#main">本文へ移動</a><header class="header"><div class="wrap header-inner"><a class="brand" href="index.html"><span class="brand-seal">文</span><span class="brand-name">文藝部<small>LITERARY CLUB</small></span></a><nav aria-label="メインナビゲーション"><a href="index.html">ホーム</a><a href="books.html">作品目録</a><a href="works.html">作品紹介</a><a href="members.html">部員のひとこと</a></nav></div></header>
 <main id="main" class="wrap"><article class="story"><p class="eyebrow">書き手の言葉 / STORIES</p><h2 style="font-size:40px">作品紹介</h2><p>物語に添える、もうひとつの言葉。<br>書き手自身が綴る作品の紹介を集めました。</p><div id="work-list"></div><noscript><a href="chiisana-tokubetsu.html">小さな特別 — ルフィナ</a></noscript><a class="action" href="books.html">部誌の表紙と収録作品の目次はこちら →</a></article></main><footer class="footer"><div class="wrap footer-inner"><div class="footer-brand">文藝部</div><a href="#top">頁のはじめへ ↑</a></div></footer><script>
 // 希望する作者の作品紹介を追加します。1件をコピーして各項目を書き換えてください。
 // 紹介文の本体はurlで指定したHTMLの「作者から」欄に書きます。
