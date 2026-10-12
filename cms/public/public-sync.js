@@ -1,8 +1,25 @@
 // Published snapshots power both local and GitHub backends; never expose drafts.
 const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
+const introductionStyle=make('style',`
+.work-introduction .work-byline{color:var(--muted,#65685e);font-size:13px;margin:0 0 24px}
+.work-introduction .work-section{margin-top:28px;min-width:0}
+.work-introduction .work-section-label{font-size:13px;letter-spacing:.12em;color:var(--red,#963e30);font-weight:500;margin:0 0 14px}
+.work-introduction .work-copy{white-space:pre-wrap;overflow-wrap:anywhere;line-height:2.1;margin:0}
+.work-introduction .work-excerpt{border:1px solid var(--line,#d2cbbc);border-left:3px solid var(--red,#963e30);background:#fff8;padding:24px;border-radius:2px}
+.work-introduction .work-excerpt blockquote{margin:0;font-size:15px;line-height:2.3}
+@media(max-width:600px){.work-introduction .work-excerpt{padding:18px}.work-introduction .work-section{margin-top:22px}}
+`);
+document.head.append(introductionStyle);
 function card(entry){
  const c=entry.content,e=make('article',undefined,'book reveal visible');
  e.append(make('h2',c.title));
+ if(entry.kind==='introduction'){
+  e.classList.add('work-introduction');
+  if(c.author)e.append(make('p','作者：'+c.author,'work-byline'));
+  if(c.body){const section=make('section',undefined,'work-section');section.append(make('h3','作品紹介','work-section-label'),make('p',c.body,'work-copy'));e.append(section);}
+  if(c.excerpt){const section=make('section',undefined,'work-section work-excerpt');section.append(make('h3','本文より抜粋','work-section-label'),make('blockquote',c.excerpt,'work-copy'));e.append(section);}
+  return e;
+ }
  for(const key of ['author','role','date','place','address','description','body','issues','excerpt']){
   if(c[key])e.append(make('p',c[key],'description'));
  }
