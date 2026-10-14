@@ -37,21 +37,31 @@ export class DriveStore{
   const data=await r.json();if(typeof data.access_token!=='string'||!data.access_token)throw new HttpError(503,'Googleへの認証を完了できませんでした');
   return this.accessToken=data.access_token;
  }
- async request(path){
+ async request(path,stage='Driveへの接続'){
   const token=await this.token();
   const r=await this.fetcher('https://www.googleapis.com/drive/v3/'+path,{redirect:'manual',signal:AbortSignal.timeout(20000),headers:{Authorization:'Bearer '+token}});
-  if(!r.ok){if(r.status===404)throw new HttpError(503,'DriveのPDFまたはフォルダが見つかりません。配置と共有設定を確認してください');if(r.status===403||r.status===401)throw new HttpError(503,'Driveの読み取り権限・API設定・利用上限を確認してください');throw new HttpError(503,'Driveへの接続を完了できませんでした');}
+  if(!r.ok){
+   let reason='UNKNOWN';
+   const allowed=new Set(['SERVICE_DISABLED','ACCESS_TOKEN_SCOPE_INSUFFICIENT','RATE_LIMIT_EXCEEDED','BILLING_DISABLED','insufficientPermissions','insufficientFilePermissions','appNotAuthorizedToFile','downloadRestrictedForRevision','domainPolicy','dailyLimitExceeded','rateLimitExceeded','userRateLimitExceeded','accessNotConfigured','forbidden','authError','notFound']);
+   try{const body=JSON.parse(new TextDecoder().decode(await boundedBytes(r,32000))),e=body.error;
+    const candidates=[...(e?.details||[]).map(x=>x.reason),...(e?.errors||[]).map(x=>x.reason)];reason=candidates.find(x=>allowed.has(x))||'UNKNOWN';
+   }catch{}
+   const detail='【'+stage+' / HTTP '+r.status+' / '+reason+'】';
+   if(reason==='SERVICE_DISABLED'||reason==='accessNotConfigured')throw new HttpError(503,'JSON鍵を作成したプロジェクトでGoogle Drive APIを有効にしてください。'+detail);
+   if(r.status===404)throw new HttpError(503,'DriveのPDFまたはフォルダが見つかりません。配置と共有設定を確認してください。'+detail);
+   throw new HttpError(503,'Driveの読み取り権限・API設定・利用上限を確認してください。'+detail);
+  }
   return r;
  }
  async metadata(id){
   const fields='id,name,mimeType,size,parents,trashed';
-  return (await this.request('files/'+encodeURIComponent(id)+'?supportsAllDrives=true&fields='+encodeURIComponent(fields))).json();
+  return (await this.request('files/'+encodeURIComponent(id)+'?supportsAllDrives=true&fields='+encodeURIComponent(fields),id===this.env.DRIVE_FOLDER_ID?'フォルダ情報の取得':'PDF情報の取得')).json();
  }
  async privatePermissions(id){
   let page='';let count=0;
   do{
    const q=new URLSearchParams({supportsAllDrives:'true',fields:'nextPageToken,permissions(type)',pageSize:'100'});if(page)q.set('pageToken',page);
-   const data=await (await this.request('files/'+encodeURIComponent(id)+'/permissions?'+q)).json();
+   const data=await (await this.request('files/'+encodeURIComponent(id)+'/permissions?'+q,id===this.env.DRIVE_FOLDER_ID?'フォルダの共有設定の確認':'PDFの共有設定の確認')).json();
    if(!Array.isArray(data.permissions)||data.permissions.length===0||data.permissions.some(p=>!['user','group'].includes(p.type)))throw new HttpError(503,'Driveの共有設定を制限付きにしてください。全員・組織全体への公開は使用できません');
    page=data.nextPageToken||'';if(++count>10)throw new HttpError(503,'Driveの共有設定を確認できませんでした');
   }while(page);
@@ -69,7 +79,7 @@ export class DriveStore{
   return {id,folder_id:this.env.DRIVE_FOLDER_ID,name:String(file.name||'PDF').slice(0,300),size};
  }
  async content(info){
-  const bytes=await boundedBytes(await this.request('files/'+encodeURIComponent(info.id)+'?alt=media&supportsAllDrives=true'),MAX_PDF);
+  const bytes=await boundedBytes(await this.request('files/'+encodeURIComponent(info.id)+'?alt=media&supportsAllDrives=true','PDF本体の取得'),MAX_PDF);
   if(bytes.length!==info.size||new TextDecoder().decode(bytes.subarray(0,5))!=='%PDF-')throw new HttpError(503,'DriveのPDFの整合性を確認できませんでした');
   return {bytes,sha256:await hash(bytes)};
  }
