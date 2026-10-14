@@ -191,3 +191,23 @@ test('Legacy GitHub PDFs still read in Drive mode; failed migration preserves or
  assert.equal((await admin.request('/api/admin/works/work-4/pdf','PUT',new TextEncoder().encode('%PDF-1.4'))).status,400);
  const before=f.driveCalls.length;assert.equal((await admin.request('/api/admin/works/work-4','DELETE')).status,200);assert.equal(f.driveCalls.length,before);
 });
+
+test('Member search matches registered author and per-work pen name; display stays pen name and drafts stay hidden',async()=>{
+ const f=fake(),c=await client(f),state=f.state(),w=state.works.find(w=>w.id==='work-4');
+ await c.request('/api/admin/authors/'+w.author_id,'PUT',{label:'tanaka',membership:'current'});
+ await c.request('/api/admin/works/work-4','PUT',{title:'あなたの名前は',credited_name:'nameless',author_id:w.author_id});
+ await c.request('/api/admin/works/work-4/pdf','PUT',new TextEncoder().encode('%PDF-1.4 search test'));
+ const member=await client(f,'member');
+ assert.equal((await member.request('/api/member/works?q=tanaka')).data.items.length,0);
+ await c.request('/api/admin/works/work-4','PUT',{member_status:'published',search_text:'友情'});
+ for(const term of ['tanaka','ＴＡＮＡＫＡ','nameless','あなたの名前は','友情']){
+  const result=await member.request('/api/member/works?q='+encodeURIComponent(term));
+  assert.equal(result.status,200);assert.equal(result.data.items.length,1,term);assert.equal(result.data.items[0].author,'nameless');
+  assert(!JSON.stringify(result.data).includes('author_id'));assert(!JSON.stringify(result.data).includes('tanaka'));
+ }
+ assert.equal((await member.request('/api/member/works?q=unrelated')).data.items.length,0);
+ await c.request('/api/admin/authors/'+w.author_id,'PUT',{label:'suzuki',membership:'current'});
+ assert.equal((await member.request('/api/member/works?q=tanaka')).data.items.length,0);
+ assert.equal((await member.request('/api/member/works?q=suzuki')).data.items[0].author,'nameless');
+ const guest=await client(f,null);assert.equal((await guest.request('/api/member/works?q=tanaka')).status,401);
+});
