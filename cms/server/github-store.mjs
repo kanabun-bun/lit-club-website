@@ -16,7 +16,11 @@ export function validateState(state){
  for(const kind of ['authors','works','entries']){const ids=new Set();for(const row of state[kind]){if(!identifier(row?.id)||ids.has(row.id))throw new HttpError(503,'保存データに不正または重複したIDがあります');ids.add(row.id);}}
  const authors=new Set(state.authors.map(x=>x.id)),works=new Set(state.works.map(x=>x.id));
  for(const a of state.authors)if(typeof a.label!=='string'||!a.label.trim()||a.label.length>100||!['current','alumni'].includes(a.membership))throw new HttpError(503,'作者データを確認してください');
- for(const w of state.works)if(!authors.has(w.author_id)||typeof w.title!=='string'||!w.title.trim()||w.title.length>200||typeof w.credited_name!=='string'||w.credited_name.length>100||typeof w.search_text!=='string'||w.search_text.length>1_000_000||!['draft','published'].includes(w.member_status)||!Number.isSafeInteger(w.version)||w.version<1||!Number.isSafeInteger(w.pdf_bytes)||w.pdf_bytes<0||w.pdf_bytes>MAX_PDF||(w.pdf_key!==null&&!/^pdfs\/[a-zA-Z0-9-]+-[a-f0-9]{64}\.pdf$/.test(w.pdf_key))||(w.member_status==='published'&&!w.pdf_key))throw new HttpError(503,'作品データを確認してください');
+ for(const w of state.works){
+  const d=w.pdf_drive;
+  if(d!=null&&(!/^[A-Za-z0-9_-]{10,200}$/.test(d.id||'')||!/^[A-Za-z0-9_-]{10,200}$/.test(d.folder_id||'')||!/^[a-f0-9]{64}$/.test(d.sha256||'')||!Number.isSafeInteger(d.size)||d.size<=0||d.size>MAX_PDF||typeof d.name!=='string'||d.name.length>300))throw new HttpError(503,'DriveのPDF参照データを確認してください');
+  if(!authors.has(w.author_id)||typeof w.title!=='string'||!w.title.trim()||w.title.length>200||typeof w.credited_name!=='string'||w.credited_name.length>100||typeof w.search_text!=='string'||w.search_text.length>1_000_000||!['draft','published'].includes(w.member_status)||!Number.isSafeInteger(w.version)||w.version<1||!Number.isSafeInteger(w.pdf_bytes)||w.pdf_bytes<0||w.pdf_bytes>MAX_PDF||(w.pdf_key!==null&&!/^pdfs\/[a-zA-Z0-9-]+-[a-f0-9]{64}\.pdf$/.test(w.pdf_key))||(d&&w.pdf_key)||(w.member_status==='published'&&!w.pdf_key&&!d))throw new HttpError(503,'作品データを確認してください');
+ }
  for(const e of state.entries){if(!Number.isSafeInteger(e.version)||e.version<1||!e.draft)throw new HttpError(503,'記事の版番号を確認してください');for(const c of [e.draft,e.published])if(c!==null){try{validateContent(e.kind,c);}catch{throw new HttpError(503,'記事データを確認してください');}if(e.kind==='introduction'&&!works.has(c.workId))throw new HttpError(503,'作品紹介の参照先がありません');}}
  return state;
 }

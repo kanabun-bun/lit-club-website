@@ -116,3 +116,78 @@ test('PDF and metadata are in the same tree/commit, not two separate writes',asy
  const trees=f.calls.filter(x=>x.path==='/git/trees');assert.equal(trees.length,1);const tree=JSON.parse(trees[0].options.body).tree;assert(tree.some(e=>e.path===STATE_PATH));assert(tree.some(e=>e.path.startsWith('pdfs/')));
  assert.equal(f.calls.filter(x=>x.path==='/git/refs/heads/main').length,1);
 });
+
+import {driveFileId,DriveStore} from '../server/drive-store.mjs';
+const testFolder='1SF0SzqwWQmlDouLO4EKhZGlGEqwmZmMh',testDriveId='sampleDrivePdf12345';
+let testIdentity;
+async function driveFixture(){
+ if(!testIdentity)testIdentity=(async()=>{
+  const key=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
+  const der=await crypto.subtle.exportKey('pkcs8',key.privateKey);
+  return {key,secret:JSON.stringify({type:'service_account',client_email:'test@example.iam.gserviceaccount.com',private_key:'-----BEGIN PRIVATE KEY-----\n'+Buffer.from(der).toString('base64')+'\n-----END PRIVATE KEY-----'})};
+ })();
+ const identity=await testIdentity,f=fake(),githubFetch=f.fetch;
+ f.driveCalls=[];f.bytes=new TextEncoder().encode('%PDF-1.4\nDrive private\n%%EOF');f.shared=false;f.folderShared=false;f.wrongFolder=false;f.missing=false;f.tokenFail=false;
+ f.fetch=async function(url,options={}){
+  assert.equal(this,globalThis);
+  const u=new URL(url);if(u.hostname==='api.github.com')return githubFetch(url,options);
+  f.driveCalls.push({url,options});
+  if(u.hostname==='oauth2.googleapis.com'){
+   const assertion=new URLSearchParams(options.body).get('assertion'),[h,c,s]=assertion.split('.');
+   assert.equal(JSON.parse(Buffer.from(c,'base64url')).scope,'https://www.googleapis.com/auth/drive.readonly');
+   assert(await crypto.subtle.verify('RSASSA-PKCS1-v1_5',identity.key.publicKey,Buffer.from(s,'base64url'),new TextEncoder().encode(h+'.'+c)));
+   return f.tokenFail?new Response('',{status:401}):Response.json({access_token:'TEST_ONLY_TOKEN'});
+  }
+  assert.equal(u.hostname,'www.googleapis.com');assert.equal(options.method,undefined);assert.equal(options.redirect,'manual');
+  assert.equal(options.headers.Authorization,'Bearer TEST_ONLY_TOKEN');
+  if(f.missing)return new Response('',{status:404});
+  if(u.pathname.endsWith('/permissions'))return Response.json({permissions:[{type:(u.pathname.includes(testFolder)?f.folderShared:f.shared)?'anyone':'user'}]});
+  if(u.searchParams.get('alt')==='media')return new Response(f.bytes);
+  const folder=u.pathname.endsWith(testFolder);
+  return Response.json(folder?{id:testFolder,mimeType:'application/vnd.google-apps.folder',trashed:false}:{id:testDriveId,name:'部誌PDF.pdf',mimeType:'application/pdf',parents:[f.wrongFolder?'another-folder':testFolder],size:String(f.bytes.length),trashed:false});
+ };
+ const settings={DRIVE_FOLDER_ID:testFolder,DRIVE_SERVICE_ACCOUNT_JSON:identity.secret};
+ const admin=await client(f,'admin',settings);
+ const link=(x={})=>admin.request('/api/admin/works/work-4/drive-pdf','PUT',{file:'https://drive.google.com/file/d/'+testDriveId+'/view',member_status:'published',search_text:'友情',...x});
+ return {f,settings,admin,link};
+}
+test('Drive URL parser accepts file URLs and IDs, rejects folders and external origins',()=>{
+ assert.equal(driveFileId(testDriveId),testDriveId);assert.equal(driveFileId('https://drive.google.com/open?id='+testDriveId),testDriveId);
+ for(const url of ['https://drive.google.com/drive/folders/'+testFolder,'https://evil.example/file/d/'+testDriveId,'https://drive.google.com.evil.example/file/d/'+testDriveId])assert.throws(()=>driveFileId(url),HttpError);
+});
+test('Drive link commits metadata atomically, private delivery works, unlink retains Drive original',async()=>{
+ const {f,settings,admin,link}=await driveFixture();assert.equal((await link()).status,200);
+ const w=f.state().works.find(w=>w.id==='work-4');assert(w.pdf_drive);assert.equal(w.pdf_key,null);assert.equal(w.pdf_bytes,0);
+ const member=await client(f,'member',settings),r=await member.request('/api/member/works/work-4/pdf');assert.equal(r.status,200);assert.deepEqual(r.data,f.bytes);assert.equal(r.response.headers.get('Cache-Control'),'private, no-store');
+ const results=await member.request('/api/member/works?q='+encodeURIComponent('友情'));assert.equal(results.data.items.length,1);assert(!JSON.stringify(results.data).includes(testDriveId));
+ const count=f.driveCalls.length,guest=await client(f,null,settings);assert.equal((await guest.request('/api/member/works/work-4/pdf')).status,401);assert.equal((await member.request('/api/admin/works/work-4/drive-pdf','PUT',{})).status,403);assert.equal(f.driveCalls.length,count);
+ assert.equal((await admin.request('/api/admin/works/work-4/drive-pdf','DELETE',{member_status:'draft',search_text:'友情'})).status,200);
+ assert.equal(f.state().works.find(w=>w.id==='work-4').member_status,'draft');assert.equal(f.driveCalls.length,count);assert.equal((await member.request('/api/member/works/work-4/pdf')).status,404);
+});
+test('Drive rejects public permissions, folder escape, lost access and failed auth without changing GitHub',async()=>{
+ for(const flag of ['shared','folderShared','wrongFolder','missing','tokenFail']){
+  const {f,link}=await driveFixture(),head=f.head;f[flag]=true;assert.notEqual((await link()).status,200);assert.equal(f.head,head,flag);
+ }
+});
+test('Drive content updates require re-link; public sharing and moving out block already linked PDF delivery',async()=>{
+ const {f,settings,link}=await driveFixture();await link();const member=await client(f,'member',settings);
+ f.bytes=new TextEncoder().encode('%PDF-1.4\nnew edited Drive PDF\n%%EOF');assert.equal((await member.request('/api/member/works/work-4/pdf')).status,409);
+ assert.equal((await link()).status,200);assert.equal((await member.request('/api/member/works/work-4/pdf')).status,200);
+ f.shared=true;assert.equal((await member.request('/api/member/works/work-4/pdf')).status,503);f.shared=false;f.wrongFolder=true;assert.equal((await member.request('/api/member/works/work-4/pdf')).status,400);
+});
+test('Drive rejects oversize PDF, stale revision before Drive access, and concurrent commit without lost writes',async()=>{
+ const a=await driveFixture();a.f.bytes=new Uint8Array(MAX_PDF+1);assert.equal((await a.link()).status,413);assert.equal(a.f.head,'head0');
+ const b=await driveFixture();b.admin.setRevision('stale');assert.equal((await b.link()).status,409);assert.equal(b.f.driveCalls.length,0);
+ const c=await driveFixture();c.f.race=true;assert.equal((await c.link()).status,409);assert.equal(c.f.head,'concurrent');assert(!c.f.state().works.find(w=>w.id==='work-4').pdf_drive);
+});
+test('Legacy GitHub PDFs still read in Drive mode; failed migration preserves original and successful link keeps archival blob',async()=>{
+ const {f,settings,admin,link}=await driveFixture(),legacy=await client(f);
+ await legacy.request('/api/admin/works/work-4/pdf','PUT',new TextEncoder().encode('%PDF-1.4 old'));
+ await legacy.request('/api/admin/works/work-4','PUT',{member_status:'published',search_text:''});
+ const old=f.state().works.find(w=>w.id==='work-4').pdf_key;
+ const member=await client(f,'member',settings);assert.equal((await member.request('/api/member/works/work-4/pdf')).status,200);
+ admin.setRevision(f.head);f.shared=true;assert.equal((await link()).status,503);assert.equal(f.state().works.find(w=>w.id==='work-4').pdf_key,old);
+ f.shared=false;assert.equal((await link()).status,200);assert(f.trees.get(f.commits.get(f.head).tree).has(old));
+ assert.equal((await admin.request('/api/admin/works/work-4/pdf','PUT',new TextEncoder().encode('%PDF-1.4'))).status,400);
+ const before=f.driveCalls.length;assert.equal((await admin.request('/api/admin/works/work-4','DELETE')).status,200);assert.equal(f.driveCalls.length,before);
+});

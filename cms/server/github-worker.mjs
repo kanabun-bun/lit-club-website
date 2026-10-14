@@ -1,6 +1,7 @@
 import {configured,session,issueSession,passwordMatches,cookie,clearCookie} from './auth.mjs';
 import {validateContent,normalize} from './model.mjs';
 import {GitHubStore,HttpError,githubConfigured,boundedBytes,MAX_PDF} from './github-store.mjs';
+import {DriveStore,driveEnabled,driveConfigured} from './drive-store.mjs';
 const json=(x,status=200,headers={})=>Response.json(x,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 async function input(request){try{return JSON.parse(new TextDecoder().decode(await boundedBytes(request,1_200_000)));}catch(e){if(e instanceof HttpError)throw e;throw new HttpError(400,'入力形式を確認してください');}}
 const check=(ok,message)=>{if(!ok)throw new HttpError(400,message);};
@@ -12,7 +13,7 @@ export async function routeGitHub(request,env,fetcher=fetch){
  if(!['GET','POST','PUT','DELETE'].includes(method))return json({error:'許可されていない操作です'},405);
  if(method!=='GET'&&request.headers.get('origin')!==url.origin)return json({error:'送信元を確認できません'},403);
  const ready=githubConfigured(env),auth=configured(env)&&!!env.LOGIN_LIMITER&&!!env.API_LIMITER;
- if(path==='/api/status'&&method==='GET')return json({backend:'github',database:ready,storage:ready,auth,pdfUpload:ready&&auth,records:ready&&auth,publicSync:ready,maxPdfBytes:MAX_PDF});
+ if(path==='/api/status'&&method==='GET')return json({backend:'github',database:ready,storage:ready,auth,pdfUpload:ready&&auth,records:ready&&auth,publicSync:ready,maxPdfBytes:MAX_PDF,pdfBackend:driveEnabled(env)?'drive':'github',driveReady:driveConfigured(env)});
  if(path==='/api/logout'&&method==='POST')return json({ok:true},200,{'Set-Cookie':clearCookie});
  const user=await session(request,env);
  if(path==='/api/session'&&method==='GET')return json({role:user?.role||'guest'});
@@ -37,12 +38,13 @@ export async function routeGitHub(request,env,fetcher=fetch){
  }
  if(path==='/api/member/works'&&method==='GET'){
   const q=normalize(url.searchParams.get('q')||'').slice(0,200);
-  return reply({items:state.works.filter(w=>w.member_status==='published'&&normalize(w.title+' '+w.credited_name+' '+w.search_text).includes(q)).map(w=>({id:w.id,title:w.title,author:w.credited_name,hasPdf:!!w.pdf_key}))});
+  return reply({items:state.works.filter(w=>w.member_status==='published'&&normalize(w.title+' '+w.credited_name+' '+w.search_text).includes(q)).map(w=>({id:w.id,title:w.title,author:w.credited_name,hasPdf:!!(w.pdf_key||w.pdf_drive)}))});
  }
  const pdf=path.match(/^\/api\/member\/works\/([a-zA-Z0-9-]+)\/pdf$/);
  if(pdf&&method==='GET'){
-  const w=state.works.find(w=>w.id===pdf[1]&&w.member_status==='published'&&w.pdf_key);if(!w)return json({error:'PDFがありません'},404);
-  return new Response(await store.pdf(snapshot,w),{headers:{'Content-Type':'application/pdf','Content-Disposition':'inline; filename="work.pdf"','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"frame-ancestors 'self'"}});
+  const w=state.works.find(w=>w.id===pdf[1]&&w.member_status==='published'&&(w.pdf_key||w.pdf_drive));if(!w)return json({error:'PDFがありません'},404);
+  const bytes=w.pdf_drive?await new DriveStore(env,fetcher).pdf(w.pdf_drive):await store.pdf(snapshot,w);
+  return new Response(bytes,{headers:{'Content-Type':'application/pdf','Content-Disposition':'inline; filename="work.pdf"','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"frame-ancestors 'self'"}});
  }
  if(path==='/api/admin/snapshot'&&method==='GET')return reply({entries:state.entries,authors:state.authors,works:state.works});
  const collection=path.match(/^\/api\/admin\/(authors|works|entries)$/);
@@ -53,13 +55,25 @@ export async function routeGitHub(request,env,fetcher=fetch){
   if(kind==='entries'){const content=validateContent(x.kind,x.content);check(x.kind!=='introduction'||state.works.some(w=>w.id===content.workId),'対象作品がありません');state.entries.push({id,kind:x.kind,draft:content,published:null,version:1,updated_at:stamp()});}
   return commit(kind+'-create',id,[],{id});
  }}
- const edit=path.match(/^\/api\/admin\/(authors|works|entries)\/([a-zA-Z0-9-]+)(\/pdf)?$/);
+ const edit=path.match(/^\/api\/admin\/(authors|works|entries)\/([a-zA-Z0-9-]+)(\/pdf|\/drive-pdf)?$/);
  if(edit){const [,kind,id,suffix]=edit,row=state[kind].find(x=>x.id===id);if(!row)return json({error:'対象データがありません'},404);
+  if(suffix==='/drive-pdf'&&kind==='works'&&['PUT','DELETE'].includes(method)){
+   if(!driveEnabled(env))return json({error:'Drive参照先が未設定です'},503);
+   const expected=request.headers.get('X-CMS-Revision');
+   if(!expected||expected!==snapshot.revision)return json({error:'一覧を再読み込みしてから保存してください'},expected?409:428);
+   const x=await input(request);
+   check(['draft','published'].includes(x.member_status)&&text(x.search_text||'',10000),'公開状態と検索キーワードを確認してください（1万文字以内）');
+   const linked=method==='DELETE'?null:await new DriveStore(env,fetcher).attach(x.file);
+   row.pdf_drive=linked;row.pdf_key=null;row.pdf_bytes=0;
+   row.member_status=linked?x.member_status:'draft';row.search_text=x.search_text||'';row.updated_at=stamp();row.version++;
+   return commit(linked?'drive-pdf-link':'drive-pdf-unlink',id,[],{message:linked?'DriveのPDFと公開状態を保存しました。':'掲載を解除しました。Driveの原本は削除していません。'});
+  }
   if(suffix&&kind==='works'&&method==='PUT'){
+   if(driveEnabled(env))return json({error:'PDFはDriveへアップロードし、管理画面で関連付けてください'},400);
    const bytes=await boundedBytes(request,MAX_PDF);check(new TextDecoder().decode(bytes.subarray(0,5))==='%PDF-','PDFファイルを選んでください');
    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
    const key='pdfs/'+id+'-'+hash+'.pdf',files=[{path:key,bytes}];if(row.pdf_key&&row.pdf_key!==key)files.push({path:row.pdf_key});
-   row.pdf_key=key;row.pdf_bytes=bytes.length;row.updated_at=stamp();row.version++;return commit('pdf-save',id,files,{bytes:bytes.length});
+   row.pdf_drive=null;row.pdf_key=key;row.pdf_bytes=bytes.length;row.updated_at=stamp();row.version++;return commit('pdf-save',id,files,{bytes:bytes.length});
   }
   if(suffix)return json({error:'未対応の操作です'},404);
   if(method==='DELETE'){
@@ -74,7 +88,7 @@ export async function routeGitHub(request,env,fetcher=fetch){
    if(kind==='authors'){check(text(x.label,100,true)&&['current','alumni'].includes(x.membership),'作者情報を確認してください');row.label=x.label.trim();row.membership=x.membership;}
    if(kind==='works'){
     if('title'in x){check(text(x.title,200,true)&&text(x.credited_name,100)&&state.authors.some(a=>a.id===x.author_id),'作品と作者を確認してください');row.title=x.title.trim();row.credited_name=x.credited_name.trim();row.author_id=x.author_id;}
-    else{check(['draft','published'].includes(x.member_status)&&text(x.search_text||'',1_000_000),'会員公開状態・検索本文を確認してください');check(x.member_status!=='published'||row.pdf_key,'先にPDFを登録してください');row.member_status=x.member_status;row.search_text=x.search_text||'';}
+    else{check(['draft','published'].includes(x.member_status)&&text(x.search_text||'',1_000_000),'会員公開状態・検索本文を確認してください');check(x.member_status!=='published'||row.pdf_key||row.pdf_drive,'先にPDFを登録してください');row.member_status=x.member_status;row.search_text=x.search_text||'';}
    }
    if(kind==='entries'){
     if(x.version!==row.version)return json({error:'別の編集が入りました。一覧を再読み込みしてください'},409);

@@ -1,0 +1,21 @@
+{
+ "name": "lit-club-drive-preview",
+ "main": "server/worker.mjs",
+ "compatibility_date": "2026-10-12",
+ "assets": {"directory":"./public","binding":"ASSETS","run_worker_first":["/api/*"]},
+ "vars": {
+  "CMS_BACKEND": "github",
+  "GITHUB_DATA_REPO": "kanabun-bun/lit-club-data",
+  "GITHUB_DATA_BRANCH": "drive-preview",
+  "DRIVE_FOLDER_ID": "1SF0SzqwWQmlDouLO4EKhZGlGEqwmZmMh",
+  "MAX_ACTIVE_PDF_BYTES": "256000000"
+ },
+ "ratelimits": [
+  {"name":"LOGIN_LIMITER","namespace_id":"1005","simple":{"limit":5,"period":60}},
+  {"name":"API_LIMITER","namespace_id":"1006","simple":{"limit":60,"period":60}}
+ ]
+ // Secrets: GITHUB_TOKEN, MEMBER_PASSWORD, ADMIN_PASSWORD, SESSION_SECRET,
+ // DRIVE_SERVICE_ACCOUNT_JSON. Use a read-only service account shared only on the PDF folder.
+ // Create the private data branch drive-preview from main BEFORE using this configuration.
+ // Production stays on main; do not point this test Worker at production data.
+}

@@ -4,6 +4,7 @@ const fieldLabels={title:'見出し・名称',workId:'対象作品',author:'掲�
 const fields={introduction:['title','workId','author','body','excerpt'],issue:['title','number','date','description','contents'],message:['title','role','author','body'],event:['title','date','place','body','url'],store:['title','address','body','url','issues'],notice:['title','date','body'],page:['title','body']};
 let demo=new URLSearchParams(location.search).has('demo');
 let localServer=false,githubServer=false,recordsEnabled=false,pdfEnabled=false,maxPdfBytes=50000000,revision='',busy=false;
+let driveMode=false;
 let role='guest',pendingRole='member',entries=[],authors=[],works=[];
 function status(message){$('status').textContent=message;}
 async function api(path,options={}){
@@ -99,19 +100,54 @@ $('entry-form').onsubmit=async event=>{
   await loadAdmin();edit(entries.find(e=>e.id===id));status(action==='publish'?'公開しました。':action==='unpublish'?'公開を取り下げました。':'下書きを保存しました。');
  }catch(e){status(e.message);}finally{buttons.forEach(b=>b.disabled=false);}
 };
-$('pdf-form').elements.work_id.onchange=()=>{const w=works.find(w=>w.id===$('pdf-form').elements.work_id.value);$('pdf-form').elements.search_text.value=w?.search_text||'';$('pdf-form').elements.member_status.value=w?.member_status||'draft';};
+$('pdf-form').elements.work_id.onchange=()=>{const w=works.find(w=>w.id===$('pdf-form').elements.work_id.value);$('pdf-form').elements.search_text.value=w?.search_text||'';$('pdf-form').elements.member_status.value=w?.member_status||'draft';if(driveMode){$('drive-file').value='';$('drive-current').textContent=w?.pdf_drive?'現在のPDF：'+w.pdf_drive.name+'（Drive）。差し替え・Driveでの内容更新後はURLを入力し直してください。':w?.pdf_key?'現在のPDF：GitHub保存。移行する場合はDriveにコピーし、そのPDFのURLを入力してください。':'PDFは未登録です。';$('drive-unlink').disabled=!w?.pdf_drive;}};
 $('pdf-form').onsubmit=async event=>{event.preventDefault();const f=event.target;try{const id=f.elements.work_id.value;if(!id)throw Error('作品を選択してください');const file=f.elements.pdf.files[0];if(file){if(file.size>maxPdfBytes)throw Error('PDFは'+Math.floor(maxPdfBytes/1000000)+'MB以内です');const r=await fetch('/api/admin/works/'+encodeURIComponent(id)+'/pdf',{method:'PUT',body:file,headers:{'Content-Type':'application/pdf',...(githubServer&&revision?{'X-CMS-Revision':revision}:{})}});const data=await r.json();if(!r.ok)throw Error(data.error);if(data.revision)revision=data.revision;f.elements.pdf.value='';}
 await api('/api/admin/works/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({member_status:f.elements.member_status.value,search_text:f.elements.search_text.value})});await loadAdmin();status('PDF・会員公開状態を保存しました。');f.elements.pdf.value='';}catch(e){status(e.message);}};
+function configureDrive(info){
+ if(info.pdfBackend!=='drive')return;
+ driveMode=true;const f=$('pdf-form'),originalNote=f.querySelector('p.note');f.elements.pdf.closest('label').hidden=true;f.elements.pdf.disabled=true;
+ const section=element('div');
+ section.append(element('p','PDFは専用のDriveフォルダへアップロードしてください。ファイルの共有は「制限付き」のままにし、そのPDFのURLを下の欄へ入力します。サイトからDriveのファイルを削除することはありません。','note'));
+ if(!info.driveReady)section.append(element('p','Driveの接続設定が未完了です。関連付けは設定完了後に利用できます。','banner'));
+ const label=element('label','DriveのPDFのURL（登録・差し替え時のみ）'),input=element('input');input.id='drive-file';input.type='text';input.maxLength=500;input.placeholder='https://drive.google.com/file/d/…/view';label.append(input);
+ const current=element('p','作品を選ぶと現在のPDFを表示します。','note');current.id='drive-current';
+ const unlink=element('button','DriveのPDFの掲載を解除');unlink.id='drive-unlink';unlink.type='button';unlink.disabled=true;
+ section.append(label,current,unlink);f.elements.work_id.closest('label').after(section);
+ f.elements.search_text.closest('label').firstChild.textContent='検索キーワード（作者名・作品名は自動で検索対象になります）';
+ f.elements.search_text.placeholder='例：青春 友情 再会 短編';
+ originalNote.textContent='全文の入力は不要です。PDFは専用フォルダ直下・1ファイル10MB以内。Drive側で本文を変更した場合は、同じURLでも関連付けを再登録してください。';
+ const buttons=()=>[...f.querySelectorAll('button')];
+ const finish=async(id,message)=>{await loadAdmin();f.elements.work_id.value=id;f.elements.work_id.onchange();status(message);};
+ f.onsubmit=async event=>{
+  event.preventDefault();if(busy)return;busy=true;buttons().forEach(b=>b.disabled=true);
+  try{
+   const id=f.elements.work_id.value,w=works.find(w=>w.id===id);if(!w)throw Error('作品を選択してください');
+   const x={member_status:f.elements.member_status.value,search_text:f.elements.search_text.value},file=input.value.trim();
+   if(x.search_text.length>10000)throw Error('検索キーワードは1万文字以内にしてください');
+   if(x.member_status==='published'&&!confirm('このPDFを部員・卒業生に公開しますか？'))return;
+   if(!file&&!w.pdf_drive&&!w.pdf_key)throw Error('DriveのPDFのURLを入力してください');
+   status('保存しています。画面を閉じずにお待ちください。');
+   if(file)await api('/api/admin/works/'+encodeURIComponent(id)+'/drive-pdf',{method:'PUT',body:JSON.stringify({...x,file})});
+   else await api('/api/admin/works/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify(x)});
+   await finish(id,'PDF・公開状態を保存しました。');
+  }catch(e){status(e.message);}finally{busy=false;buttons().forEach(b=>b.disabled=false);const w=works.find(w=>w.id===f.elements.work_id.value);unlink.disabled=!w?.pdf_drive;}
+ };
+ unlink.onclick=async()=>{
+  if(busy||!confirm('PDFの掲載を解除し、会員公開を下書きに戻します。Driveの原本は残ります。'))return;
+  busy=true;buttons().forEach(b=>b.disabled=true);
+  try{const id=f.elements.work_id.value;await api('/api/admin/works/'+encodeURIComponent(id)+'/drive-pdf',{method:'DELETE',body:JSON.stringify({member_status:'draft',search_text:f.elements.search_text.value})});await finish(id,'掲載を解除しました。Driveの原本は残っています。');}catch(e){status(e.message);}finally{busy=false;buttons().forEach(b=>b.disabled=false);unlink.disabled=!works.find(w=>w.id===f.elements.work_id.value)?.pdf_drive;}
+ };
+}
 function editAuthor(author){$('entry-form').hidden=true;$('preview').hidden=true;const f=$('author-form');f.reset();f.hidden=false;$('work-form').hidden=true;f.elements.id.value=author?.id||'';f.elements.label.value=author?.label||'';f.elements.membership.value=author?.membership||'current';$('author-form-title').textContent=author?'作者を修正':'作者を登録';f.scrollIntoView({block:'center'});}
 function editWork(work){$('entry-form').hidden=true;$('preview').hidden=true;const f=$('work-form');f.reset();f.hidden=false;$('author-form').hidden=true;f.elements.id.value=work?.id||'';f.elements.title.value=work?.title||'';f.elements.credited_name.value=work?.credited_name||'';f.elements.author_id.value=work?.author_id||'';$('work-form-title').textContent=work?'作品情報を修正':'作品を登録';f.scrollIntoView({block:'center'});}
 function renderRecords(){
  for(const [id,list,type,edit] of [['work-records',works,'works',editWork],['author-records',authors,'authors',editAuthor]]){
-  $(id).replaceChildren(...list.map(record=>{const card=element('div',undefined,'record');card.append(element('p',type==='works'?record.title+' ／ '+record.credited_name:record.label));const buttons=element('div',undefined,'toolbar');const modify=element('button','修正');modify.onclick=()=>edit(record);const remove=element('button','削除');remove.onclick=async()=>{const message=type==='works'?'この作品とPDF・関連する作品紹介を削除します。元に戻せません。部誌目次は別途修正が必要です。':'この作者を削除します。作品が残っている作者は削除できません。';if(!confirm(message))return;try{const result=await api('/api/admin/'+type+'/'+encodeURIComponent(record.id),{method:'DELETE'});await loadAdmin();status(result.warning||'削除しました。');}catch(e){status(e.message);}};buttons.append(modify,remove);card.append(buttons);return card;}));
+  $(id).replaceChildren(...list.map(record=>{const card=element('div',undefined,'record');card.append(element('p',type==='works'?record.title+' ／ '+record.credited_name:record.label));const buttons=element('div',undefined,'toolbar');const modify=element('button','修正');modify.onclick=()=>edit(record);const remove=element('button','削除');remove.onclick=async()=>{const message=type==='works'?(record.pdf_drive?'この作品のサイト掲載と関連する作品紹介を削除します。Driveの原本は残ります。部誌目次は別途修正が必要です。':'この作品とPDF・関連する作品紹介を削除します。元に戻せません。部誌目次は別途修正が必要です。'):'この作者を削除します。作品が残っている作者は削除できません。';if(!confirm(message))return;try{const result=await api('/api/admin/'+type+'/'+encodeURIComponent(record.id),{method:'DELETE'});await loadAdmin();status(result.warning||'削除しました。');}catch(e){status(e.message);}};buttons.append(modify,remove);card.append(buttons);return card;}));
  }
 }
 $('delete-entry').onclick=async()=>{const f=$('entry-form');if(!f.elements.id.value||!confirm('この記事を削除します。公開ページからも消え、元に戻せません。'))return;try{await api('/api/admin/entries/'+encodeURIComponent(f.elements.id.value),{method:'DELETE',body:JSON.stringify({version:Number(f.elements.version.value)})});f.hidden=true;$('preview').hidden=true;await loadAdmin();status('削除しました。');}catch(e){status(e.message);}};
 window.clubPortalReady=true;
-try {const probe=await fetch('/api/status');if(probe.ok){const info=await probe.json();if(info.localDemo){demo=false;localServer=true;recordsEnabled=true;pdfEnabled=true;}if(info.backend==='github'){demo=false;githubServer=true;recordsEnabled=info.records;pdfEnabled=info.pdfUpload;maxPdfBytes=info.maxPdfBytes||10000000;}}}catch{}
+try {const probe=await fetch('/api/status');if(probe.ok){const info=await probe.json();if(info.localDemo){demo=false;localServer=true;recordsEnabled=true;pdfEnabled=true;}if(info.backend==='github'){demo=false;githubServer=true;recordsEnabled=info.records;pdfEnabled=info.pdfUpload;maxPdfBytes=info.maxPdfBytes||10000000;configureDrive(info);}}}catch{}
 if(localServer){$('banner').hidden=false;$('banner').textContent='PC内の保存付きデモです。部員: member-demo ／ 管理者: admin-demo。内容はこのPCだけに保存されます。';}
 if(githubServer){$('pdf-limit').textContent='PDF（'+Math.floor(maxPdfBytes/1000000)+'MB以内・差し替え可）';}
 if(demo){
@@ -121,4 +157,4 @@ if(demo){
 }
 try{role=(await api('/api/session')).role;const config=await api('/api/status');if(!demo&&(!config.database||!config.auth)){$('banner').hidden=false;$('banner').textContent='初期設定待ちです。保存先・認証・アクセス制限の接続後に利用できます。';}await show('member');}catch(e){status(e.message);}
 
-for(const form of document.querySelectorAll("form")){const handler=form.onsubmit;if(handler)form.onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;const controls=[...document.querySelectorAll("button")];controls.forEach(b=>b.disabled=true);try{await handler(event);}finally{busy=false;controls.forEach(b=>b.disabled=false);}};}
+for(const form of document.querySelectorAll("form")){if(driveMode&&form.id==='pdf-form')continue;const handler=form.onsubmit;if(handler)form.onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;const controls=[...document.querySelectorAll("button")];controls.forEach(b=>b.disabled=true);try{await handler(event);}finally{busy=false;controls.forEach(b=>b.disabled=false);}};}
