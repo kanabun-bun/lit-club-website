@@ -1,7 +1,7 @@
 export const kinds = ['introduction','issue','message','event','store','notice','page'];
 export const fields = {
  introduction: ['title','workId','author','body','excerpt'],
- issue: ['title','number','date','description','contents'],
+ issue: ['title','number','date','description','contents','cover'],
  message: ['title','role','author','body'],
  event: ['title','date','place','body','url'],
  store: ['title','address','body','url','issues'],
@@ -18,6 +18,7 @@ export function validateContent(kind, input) {
  }
  if(!out.title || out.title.length>200) throw new Error('見出しを200文字以内で入力してください');
  if(kind==='introduction' && !out.workId) throw new Error('対象の作品を選んでください');
+ if(kind==='issue' && out.cover && !/^[a-f0-9]{64}$/.test(out.cover))throw new Error('表紙画像の指定を確認してください');
  if(kind==='message' && !['部長','副部長','メンバー'].includes(out.role)) throw new Error('役職を選んでください');
  if(out.url){const url=new URL(out.url);if(!['https:','http:'].includes(url.protocol))throw new Error('URLはhttpsまたはhttpで入力してください');}
  return out;

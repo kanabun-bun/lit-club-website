@@ -1,6 +1,7 @@
 // Published snapshots power both local and GitHub backends; never expose drafts.
 const make=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 const introductionStyle=make('style',`
+.issue-cover{display:block;width:auto;max-width:100%;max-height:320px;object-fit:contain;box-shadow:6px 9px 18px #302e2720;margin:0 auto 24px}
 .work-introduction .work-byline{color:var(--muted,#65685e);font-size:13px;margin:0 0 24px}
 .work-introduction .work-section{margin-top:28px;min-width:0}
 .work-introduction .work-section-label{font-size:13px;letter-spacing:.12em;color:var(--red,#963e30);font-weight:500;margin:0 0 14px}
@@ -13,6 +14,7 @@ document.head.append(introductionStyle);
 function card(entry){
  const c=entry.content,e=make('article',undefined,'book reveal visible');
  e.append(make('h2',c.title));
+ if(entry.kind==='issue'&&(c.cover||entry.id==='seed-issue')){const image=make('img',undefined,'issue-cover');image.src=c.cover?'/api/public/entries/'+encodeURIComponent(entry.id)+'/cover?hash='+c.cover:'images/enjaku-54.jpg';image.alt=c.title+'の表紙';image.loading='lazy';e.prepend(image);}
  if(entry.kind==='introduction'){
   e.classList.add('work-introduction');
   if(c.author)e.append(make('p','作者：'+c.author,'work-byline'));
@@ -61,8 +63,6 @@ try{
  if(shelf){
   const books=find('issue');shelf.replaceChildren(...books.map(e=>{
    const article=card(e);
-   // Preserve the existing cover image for the original issue.
-   if(e.id==='seed-issue'){const stage=make('div',undefined,'book-stage'),image=make('img');image.src='images/enjaku-54.jpg';image.alt='燕雀 No.54の表紙';image.style.maxHeight='260px';image.style.maxWidth='100%';stage.append(image);article.prepend(stage);}
    return article;
   }));
   document.getElementById('tools').hidden=true;

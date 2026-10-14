@@ -36,7 +36,7 @@ async function client(f,role='admin',extra={}){
   const headers={'CF-Connecting-IP':'192.0.2.1',Cookie:token?cookie(token):'',Origin:'https://club.example','X-CMS-Revision':revision,...options.headers};
   const req=new Request('https://club.example'+path,{method,headers,body:data===undefined?undefined:data instanceof Uint8Array?data:JSON.stringify(data)});
   let response;try{response=await routeGitHub(req,settings,f.fetch);}catch(e){if(!(e instanceof HttpError))throw e;response=Response.json({error:e.message},{status:e.status});}
-  const output=response.headers.get('Content-Type')?.includes('pdf')?new Uint8Array(await response.arrayBuffer()):await response.json();
+  const output=(/^(application\/pdf|image\/)/.test(response.headers.get('Content-Type')||''))?new Uint8Array(await response.arrayBuffer()):await response.json();
   if(response.ok&&output.revision)revision=output.revision;return {response,status:response.status,data:output};
  };return {request,setRevision(x){revision=x;}};
 }
@@ -210,4 +210,45 @@ test('Member search matches registered author and per-work pen name; display sta
  assert.equal((await member.request('/api/member/works?q=tanaka')).data.items.length,0);
  assert.equal((await member.request('/api/member/works?q=suzuki')).data.items[0].author,'nameless');
  const guest=await client(f,null);assert.equal((await guest.request('/api/member/works?q=tanaka')).status,401);
+});
+
+const jpeg=new Uint8Array([255,216,255,224,0,1,2,3,255,217]);
+test('Issue cover draft stays private; publishing exposes exact approved bytes; replacement waits for publish',async()=>{
+ const f=fake(),admin=await client(f),guest=await client(f,null);
+ const {data:{id}}=await admin.request('/api/admin/entries','POST',{kind:'issue',content:{title:'新しい部誌'}});
+ const upload=await admin.request('/api/admin/entries/'+id+'/cover','PUT',jpeg,{headers:{'Content-Type':'image/jpeg'}});
+ assert.equal(upload.status,200);const {cover,version}=upload.data;
+ const url='/api/public/entries/'+id+'/cover?hash='+cover;
+ assert.equal((await guest.request(url)).status,404);
+ assert.equal((await admin.request('/api/admin/entries/'+id+'/cover?hash='+cover)).status,200);
+ assert.equal((await admin.request('/api/admin/entries/'+id,'PUT',{action:'publish',version,content:{title:'新しい部誌',cover}})).status,200);
+ const image=await guest.request(url);assert.equal(image.status,200);assert.equal(image.response.headers.get('Content-Type'),'image/jpeg');assert.deepEqual(image.data,jpeg);
+ const replacement=new Uint8Array([255,216,255,5,4,255,217]);
+ const next=await admin.request('/api/admin/entries/'+id+'/cover','PUT',replacement,{headers:{'Content-Type':'image/jpeg'}});
+ assert.equal((await guest.request('/api/public/entries/'+id+'/cover?hash='+next.data.cover)).status,404);assert.deepEqual((await guest.request(url)).data,jpeg);
+ assert.equal((await admin.request('/api/admin/entries/'+id,'PUT',{action:'publish',version:next.data.version,content:{title:'新しい部誌',cover:next.data.cover}})).status,200);
+ assert.equal((await guest.request(url)).status,404);
+ const items=(await guest.request('/api/public/entries')).data.items;assert.equal(items.find(e=>e.id===id).content.cover,next.data.cover);
+ const v=f.state().entries.find(e=>e.id===id).version;
+ await admin.request('/api/admin/entries/'+id,'PUT',{action:'unpublish',version:v,content:{title:'新しい部誌',cover:next.data.cover}});
+ assert.equal((await guest.request('/api/public/entries/'+id+'/cover?hash='+next.data.cover)).status,404);
+});
+test('Cover upload rejects member access, oversize, invalid image, wrong entry kind and stale revisions',async()=>{
+ const f=fake(),admin=await client(f),member=await client(f,'member'),head=f.head,opts={headers:{'Content-Type':'image/jpeg'}};
+ assert.equal((await member.request('/api/admin/entries/seed-issue/cover','PUT',jpeg,opts)).status,403);
+ assert.equal((await admin.request('/api/admin/entries/seed-issue/cover','PUT',new Uint8Array(1000001),opts)).status,413);
+ assert.equal((await admin.request('/api/admin/entries/seed-issue/cover','PUT',new TextEncoder().encode('<svg onload="alert(1)"/>'),opts)).status,400);
+ assert.equal((await admin.request('/api/admin/entries/seed-introduction/cover','PUT',jpeg,opts)).status,400);
+ admin.setRevision('stale');assert.equal((await admin.request('/api/admin/entries/seed-issue/cover','PUT',jpeg,opts)).status,409);
+ assert.equal(f.head,head);
+});
+test('Cover bytes and draft metadata share one commit; tampering is detected and removal unpublishes image',async()=>{
+ const f=fake(),admin=await client(f),guest=await client(f,null),row=f.state().entries.find(e=>e.id==='seed-issue');
+ const uploaded=await admin.request('/api/admin/entries/seed-issue/cover','PUT',jpeg,{headers:{'Content-Type':'image/jpeg'}}),hash=uploaded.data.cover;
+ const tree=f.trees.get(f.commits.get(f.head).tree),path='covers/seed-issue/'+hash+'.jpg';assert(tree.has(path));assert.equal(f.state().entries.find(e=>e.id===row.id).draft.cover,hash);
+ await admin.request('/api/admin/entries/'+row.id,'PUT',{action:'publish',version:uploaded.data.version,content:{...row.draft,cover:hash}});
+ const url='/api/public/entries/'+row.id+'/cover?hash='+hash;
+ f.trees.get(f.commits.get(f.head).tree).set(path,new Uint8Array([1]));assert.equal((await guest.request(url)).status,503);
+ const version=f.state().entries.find(e=>e.id===row.id).version;
+ await admin.request('/api/admin/entries/'+row.id,'PUT',{action:'publish',version,content:{...row.draft,cover:''}});assert.equal((await guest.request(url)).status,404);
 });

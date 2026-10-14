@@ -32,6 +32,15 @@ export async function routeGitHub(request,env,fetcher=fetch){
  const store=new GitHubStore(env,fetcher),snapshot=await store.load(),state=snapshot.state;
  const reply=(x,status=200)=>json({...x,revision:snapshot.revision},status);
  const commit=async(action,target,files=[],extra={})=>{const revision=await store.save(snapshot,request.headers.get('X-CMS-Revision'),action,target,files);return json({ok:true,...extra,revision});};
+ const coverRead=path.match(/^\/api\/(public|admin)\/entries\/([a-zA-Z0-9-]+)\/cover$/);
+ if(coverRead&&method==='GET'){
+  const [,scope,id]=coverRead,row=state.entries.find(e=>e.id===id&&e.kind==='issue'),content=scope==='admin'?row?.draft:row?.published;
+  const hash=content?.cover;if(!hash||url.searchParams.get('hash')!==hash)return json({error:'表紙画像がありません'},404);
+  const r=await store.request('/contents/covers/'+id+'/'+hash+'.jpg?ref='+snapshot.revision,{},true),bytes=await boundedBytes(r,1_000_000);
+  const actual=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
+  if(actual!==hash)return json({error:'表紙画像の整合性を確認できません'},503);
+  return new Response(bytes,{headers:{'Content-Type':'image/jpeg','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+ }
  if(path==='/api/public/entries'&&method==='GET'){
   const q=normalize(url.searchParams.get('q')||'').slice(0,200);
   return reply({items:state.entries.filter(e=>e.published!==null).map(e=>({id:e.id,kind:e.kind,content:validateContent(e.kind,e.published)})).filter(e=>!q||normalize(Object.values(e.content).join(' ')).includes(q))});
@@ -56,8 +65,17 @@ export async function routeGitHub(request,env,fetcher=fetch){
   if(kind==='entries'){const content=validateContent(x.kind,x.content);check(x.kind!=='introduction'||state.works.some(w=>w.id===content.workId),'対象作品がありません');state.entries.push({id,kind:x.kind,draft:content,published:null,version:1,updated_at:stamp()});}
   return commit(kind+'-create',id,[],{id});
  }}
- const edit=path.match(/^\/api\/admin\/(authors|works|entries)\/([a-zA-Z0-9-]+)(\/pdf|\/drive-pdf)?$/);
+ const edit=path.match(/^\/api\/admin\/(authors|works|entries)\/([a-zA-Z0-9-]+)(\/pdf|\/drive-pdf|\/cover)?$/);
  if(edit){const [,kind,id,suffix]=edit,row=state[kind].find(x=>x.id===id);if(!row)return json({error:'対象データがありません'},404);
+  if(suffix==='/cover'&&kind==='entries'&&method==='PUT'){
+   check(row.kind==='issue','部誌の表紙だけ登録できます');
+   check(request.headers.get('Content-Type')?.split(';')[0]==='image/jpeg','JPEG画像を選択してください');
+   const bytes=await boundedBytes(request,1_000_000);
+   check(bytes.length>=5&&bytes[0]===255&&bytes[1]===216&&bytes[2]===255&&bytes.at(-2)===255&&bytes.at(-1)===217,'JPEG画像を確認してください');
+   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
+   row.draft={...row.draft,cover:hash};row.version++;row.updated_at=stamp();
+   return commit('cover-upload',id,[{path:'covers/'+id+'/'+hash+'.jpg',bytes}],{cover:hash,version:row.version});
+  }
   if(suffix==='/drive-pdf'&&kind==='works'&&['PUT','DELETE'].includes(method)){
    if(!driveEnabled(env))return json({error:'Drive参照先が未設定です'},503);
    const expected=request.headers.get('X-CMS-Revision');

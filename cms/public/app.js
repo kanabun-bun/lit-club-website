@@ -1,10 +1,11 @@
 const $=id=>document.getElementById(id);
 const labels={introduction:'作品紹介',issue:'部誌',message:'部員のひとこと',event:'イベント',store:'冊子設置先',notice:'お知らせ',page:'活動紹介（ホーム掲載）'};
 const fieldLabels={title:'見出し・名称',workId:'対象作品',author:'掲載名',body:'本文・紹介文',excerpt:'一般公開する短い抜粋',number:'号数',date:'日付・期間',description:'紹介文',contents:'目次（作品名・作者・ページを一行ずつ）',role:'役職',place:'会場',url:'案内URL',address:'住所',issues:'取り扱い部誌（一行ずつ）'};
-const fields={introduction:['title','workId','author','body','excerpt'],issue:['title','number','date','description','contents'],message:['title','role','author','body'],event:['title','date','place','body','url'],store:['title','address','body','url','issues'],notice:['title','date','body'],page:['title','body']};
+const fields={introduction:['title','workId','author','body','excerpt'],issue:['title','number','date','description','contents','cover'],message:['title','role','author','body'],event:['title','date','place','body','url'],store:['title','address','body','url','issues'],notice:['title','date','body'],page:['title','body']};
 let demo=new URLSearchParams(location.search).has('demo');
 let localServer=false,githubServer=false,recordsEnabled=false,pdfEnabled=false,maxPdfBytes=50000000,revision='',busy=false;
 let driveMode=false;
+let coverPreviewUrl='';
 let role='guest',pendingRole='member',entries=[],authors=[],works=[];
 function status(message){$('status').textContent=message;}
 async function api(path,options={}){
@@ -32,7 +33,8 @@ async function demoApi(path,options){
 function element(tag,text,className){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(className)e.className=className;return e;}
 function renderContent(kind,c){
  const card=element('article',undefined,'card');card.append(element('p',labels[kind],'eyebrow'),element('h2',c.title));
- for(const field of fields[kind].filter(x=>!['title','workId'].includes(x))){if(!c[field])continue;if(field==='url'){try{const url=new URL(c[field]);if(['https:','http:'].includes(url.protocol)){const a=element('a','案内ページへ →');a.href=url.href;a.rel='noopener noreferrer';card.append(a);}}catch{}}else card.append(element('p',c[field]));}
+ if(kind==='issue'&&(coverPreviewUrl||c.cover)){const image=element('img');image.src=coverPreviewUrl||'/api/admin/entries/'+encodeURIComponent($('entry-form').elements.id.value)+'/cover?hash='+c.cover;image.alt=c.title+'の表紙';image.style.maxWidth='100%';image.style.maxHeight='300px';card.append(image);}
+ for(const field of fields[kind].filter(x=>!['title','workId','cover'].includes(x))){if(!c[field])continue;if(field==='url'){try{const url=new URL(c[field]);if(['https:','http:'].includes(url.protocol)){const a=element('a','案内ページへ →');a.href=url.href;a.rel='noopener noreferrer';card.append(a);}}catch{}}else card.append(element('p',c[field]));}
  return card;
 }
 async function show(view){
@@ -69,12 +71,35 @@ function edit(entry){
 }
 function renderFields(content){
  const kind=$('editor-kind').value;
- $('editor-fields').replaceChildren(...fields[kind].map(field=>{
+ if(coverPreviewUrl){URL.revokeObjectURL(coverPreviewUrl);coverPreviewUrl='';}
+ $('editor-fields').replaceChildren(...fields[kind].filter(field=>field!=='cover').map(field=>{
   const label=element('label',fieldLabels[field]);let input;
   if(field==='role'||field==='workId'){input=element('select');const choices=field==='role'?['部長','副部長','メンバー'].map(x=>({value:x,label:x})):[{value:'',label:'作品を選択'},...works.map(w=>({value:w.id,label:w.title+' ／ '+w.credited_name}))];choices.forEach(x=>{const o=element('option',x.label);o.value=x.value;input.append(o);});}
   else input=element(['body','excerpt','description','contents','issues'].includes(field)?'textarea':'input');
   input.name=field;input.value=content[field]||'';if(['title','workId','role'].includes(field))input.required=true;if(field==='title')input.maxLength=200;else if(input.tagName!=='SELECT')input.maxLength=20000;label.append(input);return label;
  }));
+ if(kind==='issue'){
+  const hidden=element('input');hidden.type='hidden';hidden.name='cover';hidden.value=content.cover||'';$('editor-fields').append(hidden);
+  if(githubServer){
+   const label=element('label','表紙画像（JPEG・PNG・WebP／選択後に保存・公開してください）'),file=element('input');file.type='file';file.name='_cover_file';file.accept='image/jpeg,image/png,image/webp';
+   const image=element('img');image.alt='表紙画像の確認';image.style.maxWidth='100%';image.style.maxHeight='280px';image.hidden=!content.cover;
+   if(content.cover)image.src='/api/admin/entries/'+encodeURIComponent($('entry-form').elements.id.value)+'/cover?hash='+content.cover;
+   file.onchange=()=>{if(coverPreviewUrl)URL.revokeObjectURL(coverPreviewUrl);coverPreviewUrl='';const selected=file.files[0];if(selected){if(!['image/jpeg','image/png','image/webp'].includes(selected.type)||selected.size>10000000){file.value='';status('表紙はJPEG・PNG・WebPの10MB以内を選択してください');return;}coverPreviewUrl=URL.createObjectURL(selected);image.src=coverPreviewUrl;image.hidden=false;}};
+   label.append(file);$('editor-fields').append(label,element('p','画像はブラウザで縮小し、1MB以内のJPEGとして保存します。下書き保存では一般公開されません。','note'),image);
+   const remove=element('button','表紙を外す');remove.type='button';remove.onclick=()=>{hidden.value='';file.value='';image.hidden=true;if(coverPreviewUrl)URL.revokeObjectURL(coverPreviewUrl);coverPreviewUrl='';};$('editor-fields').append(remove);
+  }
+ }
+}
+async function prepareCover(file){
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>10000000)throw Error('表紙画像はJPEG・PNG・WebPの10MB以内にしてください');
+ const source=URL.createObjectURL(file),image=new Image();
+ try{await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('画像を読み込めませんでした'));image.src=source;});
+  if(!image.naturalWidth||image.naturalWidth*image.naturalHeight>40000000)throw Error('画像が大きすぎます。縮小した画像を選択してください');
+  const ratio=Math.min(1,1600/Math.max(image.naturalWidth,image.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(image.naturalHeight*ratio));
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
+  for(const quality of [.85,.65,.45]){const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));if(blob&&blob.size<=1000000)return blob;}
+  throw Error('画像を1MB以内に縮小できませんでした。小さい画像を選択してください');
+ }finally{URL.revokeObjectURL(source);}
 }
 function formContent(){const values=new FormData($('entry-form'));const c={};for(const field of fields[$('editor-kind').value])c[field]=String(values.get(field)||'');return c;}
 for(const [kind,label] of Object.entries(labels)){for(const id of ['editor-kind','admin-kind']){const o=element('option',label);o.value=kind;$(id).append(o);}}
@@ -95,7 +120,10 @@ $('entry-form').onsubmit=async event=>{
  const buttons=[...f.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);
  try{
   let id=f.elements.id.value,version=Number(f.elements.version.value);const content=formContent();
+  const coverFile=kind==='issue'?f.querySelector('[name="_cover_file"]')?.files[0]:null;
+  const coverBlob=coverFile?await prepareCover(coverFile):null;
   if(!id){const x=await api('/api/admin/entries',{method:'POST',body:JSON.stringify({kind,content})});id=x.id;version=1;f.elements.id.value=id;f.elements.version.value=version;}
+  if(coverBlob){const x=await api('/api/admin/entries/'+encodeURIComponent(id)+'/cover',{method:'PUT',headers:{'Content-Type':'image/jpeg'},body:coverBlob});content.cover=x.cover;version=x.version;f.elements.version.value=version;f.elements.cover.value=x.cover;f.querySelector('[name="_cover_file"]').value='';}
   await api('/api/admin/entries/'+id,{method:'PUT',body:JSON.stringify({action,content,version})});
   await loadAdmin();edit(entries.find(e=>e.id===id));status(action==='publish'?'公開しました。':action==='unpublish'?'公開を取り下げました。':'下書きを保存しました。');
  }catch(e){status(e.message);}finally{buttons.forEach(b=>b.disabled=false);}
