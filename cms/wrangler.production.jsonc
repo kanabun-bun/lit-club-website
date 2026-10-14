@@ -13,7 +13,8 @@
     "CMS_BACKEND": "github",
     "GITHUB_DATA_REPO": "kanabun-bun/lit-club-data",
     "GITHUB_DATA_BRANCH": "main",
-    "MAX_ACTIVE_PDF_BYTES": "256000000"
+    "MAX_ACTIVE_PDF_BYTES": "256000000",
+    "DRIVE_FOLDER_ID": "1SF0SzqwWQmlDouLO4EKhZGlGEqwmZmMh"
   },
   "ratelimits": [
     {
