@@ -38,7 +38,8 @@ export async function routeGitHub(request,env,fetcher=fetch){
  }
  if(path==='/api/member/works'&&method==='GET'){
   const q=normalize(url.searchParams.get('q')||'').slice(0,200);
-  return reply({items:state.works.filter(w=>w.member_status==='published'&&normalize(w.title+' '+w.credited_name+' '+w.search_text).includes(q)).map(w=>({id:w.id,title:w.title,author:w.credited_name,hasPdf:!!(w.pdf_key||w.pdf_drive)}))});
+  const authorLabels=new Map(state.authors.map(a=>[a.id,a.label]));
+  return reply({items:state.works.filter(w=>w.member_status==='published'&&normalize([w.title,w.credited_name,authorLabels.get(w.author_id)||'',w.search_text].join(' ')).includes(q)).map(w=>({id:w.id,title:w.title,author:w.credited_name,hasPdf:!!(w.pdf_key||w.pdf_drive)}))});
  }
  const pdf=path.match(/^\/api\/member\/works\/([a-zA-Z0-9-]+)\/pdf$/);
  if(pdf&&method==='GET'){
